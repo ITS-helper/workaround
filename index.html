@@ -1149,9 +1149,9 @@
       const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
       const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
 
-      let report = `📋 Отчёт по обходу\n`;
-      report += `${date}\n`;
-      report += `Сотрудник: ${name}\n`;
+      let report = `📅 ${date}\n`;
+      report += `Отчёт по обходу:\n`;
+      report += `${name}\n`;
       report += `Маршрут: ${lineLabel}\n`;
       report += `Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
 
