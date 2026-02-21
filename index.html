@@ -769,39 +769,50 @@
             <span class="count-chip done" id="chipDone">Выполнено: —</span>
           </div>
 
-          <!-- Новые и потерянные метки -->
-          <div class="tag-events">
+        </div>
+      </div>
+    </div>
 
-            <div class="tag-event-block tag-event-new">
-              <div class="tag-event-header">
-                <span class="tag-event-icon">＋</span>
-                <span class="tag-event-title">Новые метки</span>
-                <div class="tag-event-counter">
-                  <button class="counter-btn" onclick="changeCount('new', -1)">−</button>
-                  <span id="countNew">0</span>
-                  <button class="counter-btn" onclick="changeCount('new', 1)">＋</button>
-                </div>
+    <!-- МЕТКИ: НОВЫЕ И ПОТЕРЯННЫЕ -->
+    <div class="task-group" data-group="tag-events-block">
+      <div class="group-header">
+        <div class="group-title-row">
+          <h2><span class="icon">🏷️</span> Изменения по меткам</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" data-group="tag-events-block" style="width:0%"></div></div>
+      </div>
+      <div class="subtasks"><div class="subtasks-inner">
+        <div class="tag-events">
+
+          <div class="tag-event-block tag-event-new">
+            <div class="tag-event-header">
+              <span class="tag-event-icon">＋</span>
+              <span class="tag-event-title">Новые метки</span>
+              <div class="tag-event-counter">
+                <button class="counter-btn" onclick="changeCount('new', -1)">−</button>
+                <span id="countNew">0</span>
+                <button class="counter-btn" onclick="changeCount('new', 1)">＋</button>
               </div>
-              <textarea id="notesNew" class="tag-event-notes" placeholder="Номера новых меток через запятую: 101, 205, 318..."></textarea>
             </div>
+            <textarea id="notesNew" class="tag-event-notes" placeholder="Номера новых меток через запятую: 101, 205, 318..."></textarea>
+          </div>
 
-            <div class="tag-event-block tag-event-lost">
-              <div class="tag-event-header">
-                <span class="tag-event-icon">−</span>
-                <span class="tag-event-title">Потерянные метки</span>
-                <div class="tag-event-counter">
-                  <button class="counter-btn" onclick="changeCount('lost', -1)">−</button>
-                  <span id="countLost">0</span>
-                  <button class="counter-btn" onclick="changeCount('lost', 1)">＋</button>
-                </div>
+          <div class="tag-event-block tag-event-lost">
+            <div class="tag-event-header">
+              <span class="tag-event-icon">−</span>
+              <span class="tag-event-title">Потерянные метки</span>
+              <div class="tag-event-counter">
+                <button class="counter-btn" onclick="changeCount('lost', -1)">−</button>
+                <span id="countLost">0</span>
+                <button class="counter-btn" onclick="changeCount('lost', 1)">＋</button>
               </div>
-              <textarea id="notesLost" class="tag-event-notes" placeholder="Номера потерянных меток через запятую: 42, 77..."></textarea>
             </div>
-
+            <textarea id="notesLost" class="tag-event-notes" placeholder="Номера потерянных меток через запятую: 42, 77..."></textarea>
           </div>
 
         </div>
-      </div>
+      </div></div>
     </div>
 
     <!-- ВЕЧЕР -->
@@ -919,9 +930,9 @@
 
     function updateAllProgress() {
       document.querySelectorAll('.task-group').forEach(group => {
+        if (group.dataset.group === 'tag-events-block') return;
         updateGroupProgress(group.dataset.group);
       });
-      // No global % bar anymore — report section handles line progress
     }
 
     function changeCount(type, delta) {
@@ -930,6 +941,8 @@
       el.textContent = Math.max(0, current + delta);
       saveState();
     }
+
+    function updateReportSection() {
       const info = labelCounts[currentLine];
       const infoEl = document.getElementById("reportLineInfo");
       const btn = document.getElementById("reportBtn");
