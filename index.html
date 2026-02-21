@@ -883,7 +883,7 @@
       // Определяем 4 нужных колонки по ключевым словам в заголовках
       const colMatchers = [
         { label: '№ метки',          match: h => norm(h).includes('метк') },
-        { label: 'Наименование зоны', match: h => norm(h).includes('наим') || norm(h).includes('зон') || norm(h).includes('тип') },
+        { label: 'Наименование зоны исходя из типа', match: h => norm(h).includes('наим') && (norm(h).includes('зон') || norm(h).includes('тип')) },
         { label: 'Описание',          match: h => norm(h).includes('опис') },
         { label: 'Статус обхода',     match: h => norm(h) === norm(STATUS_COL_NAME) || norm(h).includes('стат') },
       ];
