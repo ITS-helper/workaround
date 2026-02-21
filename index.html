@@ -73,7 +73,7 @@
     /* ── CONTAINER ── */
     .container {
       max-width: 960px;
-      margin: 0 auto 120px auto;
+      margin: 0 auto 40px auto;
       padding: 24px 20px;
     }
 
@@ -466,62 +466,64 @@
     }
     .count-chip.done { background: rgba(16,185,129,0.12); color: var(--success); }
 
-    /* ── ACTIONS BAR ── */
-    .actions {
-      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-      display: flex;
-      gap: 16px;
-      padding: 10px 20px;
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(16px);
-      border-radius: 999px;
-      box-shadow: 0 8px 32px rgba(11,39,64,0.2);
+    /* ── REPORT SECTION ── */
+    .report-section {
+      margin-top: 8px;
+      background: var(--glass-bg);
+      border-radius: 12px;
       border: 1px solid var(--border);
-      z-index: 999;
-      width: auto;
-      max-width: 320px;
+      box-shadow: 0 4px 16px rgba(11,39,64,0.07);
+      padding: 20px 24px;
+      display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .btn {
-      padding: 9px 20px;
-      border: none;
-      border-radius: 999px;
+    .report-line-info {
+      font-size: 14px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 180px;
+    }
+    .report-line-info strong {
+      color: var(--primary);
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 13.5px;
+    }
+    .report-line-info .pct {
       font-family: 'Oswald', sans-serif;
+      font-size: 1.5em;
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+    .report-line-info .pct.pct-done { color: var(--success); }
+    .btn-report {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.95em;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .btn-primary {
+      font-weight: 600;
+      padding: 11px 28px;
+      border-radius: 999px;
+      border: none;
       background: var(--accent);
       color: #04111f;
-      border: 1px solid rgba(0,176,255,0.5);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0,176,255,0.3);
     }
-    .btn-primary:hover {
+    .btn-report:hover:not(:disabled) {
       background: #19b9ff;
-      box-shadow: 0 4px 16px rgba(0,176,255,0.4);
+      box-shadow: 0 6px 20px rgba(0,176,255,0.45);
       transform: translateY(-1px);
     }
-    .btn-ghost {
-      background: transparent;
-      color: var(--primary);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { background: #f0f6ff; border-color: var(--accent); }
-    #totalProgress {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--primary);
-      min-width: 52px;
-      text-align: center;
-      letter-spacing: 0.02em;
+    .btn-report:disabled {
+      background: var(--progress-bg);
+      color: var(--muted);
+      box-shadow: none;
+      cursor: default;
     }
 
     /* ── CONFETTI ── */
@@ -693,13 +695,17 @@
       </div></div>
     </div>
 
-  </div><!-- /container -->
+    <!-- ОТЧЁТ -->
+    <div class="report-section">
+      <div class="report-line-info" id="reportLineInfo">
+        Выберите маршрут в блоке «Обход по меткам» для формирования отчёта
+      </div>
+      <button class="btn btn-report" id="reportBtn" onclick="exportReport()" disabled>
+        ↗ Сформировать отчёт
+      </button>
+    </div>
 
-  <!-- Actions bar -->
-  <div class="actions">
-    <div id="totalProgress">0%</div>
-    <button class="btn btn-primary" onclick="exportReport()">↗ Отчёт</button>
-  </div>
+  </div><!-- /container -->
 
   <canvas id="confetti"></canvas>
 
@@ -774,15 +780,29 @@
     }
 
     function updateAllProgress() {
-      let totalTasks = 0, totalChecked = 0;
       document.querySelectorAll('.task-group').forEach(group => {
-        const { checked, total } = updateGroupProgress(group.dataset.group);
-        totalTasks += total;
-        totalChecked += checked;
+        updateGroupProgress(group.dataset.group);
       });
-      const pct = totalTasks ? Math.round((totalChecked / totalTasks) * 100) : 0;
-      document.getElementById('totalProgress').textContent = pct + '%';
-      if (pct === 100) showConfetti();
+      // No global % bar anymore — report section handles line progress
+    }
+
+    function updateReportSection() {
+      const info = labelCounts[currentLine];
+      const infoEl = document.getElementById("reportLineInfo");
+      const btn = document.getElementById("reportBtn");
+
+      if (!info || info.total === 0) {
+        infoEl.innerHTML = `Откройте блок «Обход по меткам» и выберите маршрут`;
+        btn.disabled = true;
+        return;
+      }
+
+      const pct = Math.round((info.done / info.total) * 100);
+      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
+      const isDone = pct === 100;
+
+      infoEl.innerHTML = `<span class="pct ${isDone ? 'pct-done' : ''}">${pct}%</span> <strong>${lineLabel}</strong> — выполнено ${info.done} из ${info.total} меток`;
+      btn.disabled = false;
     }
 
     function resetAll() {
@@ -866,7 +886,8 @@
         };
 
         lineData[lineKey] = { headers, rows, labelIdx, statusIdx };
-        updateBadges();
+      updateBadges();
+        updateReportSection();
         renderLine(lineKey);
       } catch(e) {
         setTableContent(`<tr><td class="table-error" colspan="99">Ошибка загрузки данных</td></tr>`);
@@ -958,6 +979,7 @@
       document.querySelectorAll('.line-tab').forEach(t => t.classList.toggle('active', t.dataset.line === lineKey));
       document.getElementById("tableSearch").value = "";
       loadLine(lineKey);
+      updateReportSection();
       saveState();
     }
 
@@ -967,25 +989,14 @@
     function exportReport() {
       const name = document.getElementById('workerName').value || 'Инженер';
       const date = document.getElementById('workDate').value || new Date().toLocaleDateString('ru-RU');
-      const progress = document.getElementById('totalProgress').textContent;
+      const info = labelCounts[currentLine];
+      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
+      const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
 
-      let report = `📋 ITSSupport — Чек-лист дежурного\n`;
+      let report = `📋 ITSSupport — Отчёт по обходу\n`;
       report += `👤 ${name}   📅 ${date}\n`;
-      report += `✅ Выполнено: ${progress}\n\n`;
-
-      report += `📡 Обход по меткам:\n`;
-      ["1","2","kns"].forEach(k => {
-        const label = k === "kns" ? "КНС" : k === "2" ? "Линия 3" : `Линия ${k}`;
-        const info = labelCounts[k];
-        report += `  ${info.done === info.total && info.total > 0 ? '✅' : '⬜'} ${label}: ${info.done}/${info.total}\n`;
-      });
-
-      report += `\n📁 Блоки чек-листа:\n`;
-      document.querySelectorAll('.task-group').forEach(group => {
-        const title = group.querySelector('h2').textContent.trim();
-        const bar = group.querySelector('.progress-bar').style.width || '0%';
-        report += `  ${bar === '100%' ? '✅' : '⬜'} ${title} [${bar}]\n`;
-      });
+      report += `📍 Маршрут: ${lineLabel}\n`;
+      report += `✅ Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
 
       navigator.clipboard.writeText(report)
         .then(() => alert('✅ Отчёт скопирован!\nВставьте в Telegram или другой чат.'))
