@@ -473,6 +473,100 @@
     }
     .count-chip.done { background: rgba(16,185,129,0.12); color: var(--success); }
 
+    /* ── TAG EVENTS ── */
+    .tag-events {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    @media (max-width: 540px) {
+      .tag-events { grid-template-columns: 1fr; }
+    }
+    .tag-event-block {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tag-event-new { border-left: 3px solid var(--success); }
+    .tag-event-lost { border-left: 3px solid #f87171; }
+
+    .tag-event-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tag-event-icon {
+      font-size: 15px;
+      font-weight: 700;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-family: 'Oswald', sans-serif;
+    }
+    .tag-event-new .tag-event-icon { background: rgba(16,185,129,0.15); color: var(--success); }
+    .tag-event-lost .tag-event-icon { background: rgba(248,113,113,0.15); color: #e11d48; }
+
+    .tag-event-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.82em;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--primary);
+      flex: 1;
+    }
+    .tag-event-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag-event-counter span {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1.15em;
+      min-width: 24px;
+      text-align: center;
+      color: var(--primary);
+    }
+    .counter-btn {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      line-height: 1;
+      padding: 0;
+    }
+    .counter-btn:hover { background: #f0f6ff; border-color: var(--accent); }
+
+    .tag-event-notes {
+      width: 100%;
+      min-height: 56px;
+      resize: vertical;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: 'Source Sans 3', sans-serif;
+      background: #fff;
+      color: #1a2a3a;
+      transition: border-color 0.2s;
+      line-height: 1.4;
+    }
+    .tag-event-notes:focus { outline: none; border-color: var(--accent); }
+    .tag-event-notes::placeholder { color: #a0b0c0; }
+
     /* ── REPORT SECTION ── */
     .report-section {
       margin-top: 8px;
@@ -675,6 +769,37 @@
             <span class="count-chip done" id="chipDone">Выполнено: —</span>
           </div>
 
+          <!-- Новые и потерянные метки -->
+          <div class="tag-events">
+
+            <div class="tag-event-block tag-event-new">
+              <div class="tag-event-header">
+                <span class="tag-event-icon">＋</span>
+                <span class="tag-event-title">Новые метки</span>
+                <div class="tag-event-counter">
+                  <button class="counter-btn" onclick="changeCount('new', -1)">−</button>
+                  <span id="countNew">0</span>
+                  <button class="counter-btn" onclick="changeCount('new', 1)">＋</button>
+                </div>
+              </div>
+              <textarea id="notesNew" class="tag-event-notes" placeholder="Номера новых меток через запятую: 101, 205, 318..."></textarea>
+            </div>
+
+            <div class="tag-event-block tag-event-lost">
+              <div class="tag-event-header">
+                <span class="tag-event-icon">−</span>
+                <span class="tag-event-title">Потерянные метки</span>
+                <div class="tag-event-counter">
+                  <button class="counter-btn" onclick="changeCount('lost', -1)">−</button>
+                  <span id="countLost">0</span>
+                  <button class="counter-btn" onclick="changeCount('lost', 1)">＋</button>
+                </div>
+              </div>
+              <textarea id="notesLost" class="tag-event-notes" placeholder="Номера потерянных меток через запятую: 42, 77..."></textarea>
+            </div>
+
+          </div>
+
         </div>
       </div>
     </div>
@@ -749,7 +874,11 @@
         groups: Array.from(document.querySelectorAll('.task-group'))
           .map(g => ({ id: g.dataset.group, open: g.classList.contains('open') })),
         tableOpen: document.querySelector('[data-tgroup="lines"]').classList.contains('open'),
-        currentLine: currentLine
+        currentLine: currentLine,
+        countNew: document.getElementById('countNew').textContent,
+        countLost: document.getElementById('countLost').textContent,
+        notesNew: document.getElementById('notesNew').value,
+        notesLost: document.getElementById('notesLost').value
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
@@ -770,6 +899,10 @@
           });
           if (saved.tableOpen) document.querySelector('[data-tgroup="lines"]').classList.add('open');
           if (saved.currentLine) currentLine = saved.currentLine;
+          if (saved.countNew) document.getElementById('countNew').textContent = saved.countNew;
+          if (saved.countLost) document.getElementById('countLost').textContent = saved.countLost;
+          if (saved.notesNew) document.getElementById('notesNew').value = saved.notesNew;
+          if (saved.notesLost) document.getElementById('notesLost').value = saved.notesLost;
         }
       } catch (e) {}
       updateAllProgress();
@@ -791,7 +924,12 @@
       // No global % bar anymore — report section handles line progress
     }
 
-    function updateReportSection() {
+    function changeCount(type, delta) {
+      const el = document.getElementById(type === 'new' ? 'countNew' : 'countLost');
+      const current = parseInt(el.textContent) || 0;
+      el.textContent = Math.max(0, current + delta);
+      saveState();
+    }
       const info = labelCounts[currentLine];
       const infoEl = document.getElementById("reportLineInfo");
       const btn = document.getElementById("reportBtn");
@@ -998,10 +1136,27 @@
       const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
       const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
 
-      let report = `📋 ITSSupport — Отчёт по обходу\n`;
-      report += `👤 ${name}   📅 ${date}\n`;
-      report += `📍 Маршрут: ${lineLabel}\n`;
-      report += `✅ Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
+      let report = `📋 Отчёт по обходу\n`;
+      report += `${date}\n`;
+      report += `Сотрудник: ${name}\n`;
+      report += `Маршрут: ${lineLabel}\n`;
+      report += `Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
+
+      const countNew = parseInt(document.getElementById('countNew').textContent) || 0;
+      const countLost = parseInt(document.getElementById('countLost').textContent) || 0;
+      const notesNew = document.getElementById('notesNew').value.trim();
+      const notesLost = document.getElementById('notesLost').value.trim();
+
+      if (countNew > 0) {
+        report += `\nНовые метки: ${countNew} шт.`;
+        if (notesNew) report += `\nНомера: ${notesNew}`;
+        report += `\n`;
+      }
+      if (countLost > 0) {
+        report += `\nПотерянные метки: ${countLost} шт.`;
+        if (notesLost) report += `\nНомера: ${notesLost}`;
+        report += `\n`;
+      }
 
       navigator.clipboard.writeText(report)
         .then(() => alert('✅ Отчёт скопирован!\nВставьте в Telegram или другой чат.'))
@@ -1096,10 +1251,9 @@
         tab.addEventListener('click', () => switchLine(tab.dataset.line));
       });
 
-      // Search
-      document.getElementById('tableSearch').addEventListener('input', () => {
-        renderLine(currentLine);
-      });
+      // Tag event notes autosave
+      document.getElementById('notesNew').addEventListener('input', saveState);
+      document.getElementById('notesLost').addEventListener('input', saveState);
 
       // Auto-load if table was open
       if (document.querySelector('[data-tgroup="lines"]').classList.contains('open')) {
