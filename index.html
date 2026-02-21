@@ -633,7 +633,7 @@
               Линия 1 <span class="tab-badge" id="badge1">—</span>
             </button>
             <button class="line-tab" data-line="2">
-              Линия 2 <span class="tab-badge" id="badge2">—</span>
+              Линия 3 <span class="tab-badge" id="badge2">—</span>
             </button>
             <button class="line-tab" data-line="kns">
               КНС <span class="tab-badge" id="badgeKns">—</span>
@@ -713,9 +713,9 @@
     const STATUS_RANGE = "Q1:R2";
 
     const GROUPS = {
-      "1":   "D2:M150",
-      "2":   "R2:Z150",
-      "kns": "AR2:AZ150"
+      "1":   "D2:M200",
+      "2":   "R2:Z200",
+      "kns": "AD2:AM200"
     };
 
     const TRIGGER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzU7wYhYZxJu8_QvJMq174aPZ6lPeHu5PY6jqfyGbE1QgxZv0KwFVvgsDt_A2-wXUWA/exec";
@@ -975,7 +975,7 @@
 
       report += `📡 Обход по меткам:\n`;
       ["1","2","kns"].forEach(k => {
-        const label = k === "kns" ? "КНС" : `Линия ${k}`;
+        const label = k === "kns" ? "КНС" : k === "2" ? "Линия 3" : `Линия ${k}`;
         const info = labelCounts[k];
         report += `  ${info.done === info.total && info.total > 0 ? '✅' : '⬜'} ${label}: ${info.done}/${info.total}\n`;
       });
