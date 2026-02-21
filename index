@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чек-лист — Линии и КНС</title>
+  <meta name="theme-color" content="#0b2740">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0b2740;
+      --secondary: #123b63;
+      --accent: #00b0ff;
+      --bg-main: #eef2f8;
+      --card-bg: #ffffff;
+      --muted: #5a6a7e;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --progress-bg: #dde4ee;
+      --glass-bg: rgba(255,255,255,0.92);
+      --border: #dde4ee;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg-main);
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(0,176,255,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 100%, rgba(11,39,64,0.07) 0%, transparent 55%);
+      margin: 0; padding: 0; min-height: 100vh;
+      color: #1a2a3a;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(90deg, #0b2740 0%, #0e3359 60%, #123b63 100%);
+      padding: 0;
+      box-shadow: 0 4px 24px rgba(11,39,64,0.45);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 2px solid rgba(0,176,255,0.3);
+    }
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo-text {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.25em;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .header-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75em;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      border-left: 1px solid rgba(255,255,255,0.2);
+      padding-left: 16px;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto 120px auto;
+      padding: 24px 20px;
+    }
+
+    h1 {
+      font-family: 'Oswald', sans-serif;
+      color: var(--primary);
+      margin: 0 0 24px 0;
+      font-size: 1.9em;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* ── INTRO ── */
+    .intro {
+      background: var(--glass-bg);
+      padding: 18px 22px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(11,39,64,0.08);
+    }
+    .intro-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .intro-field label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.78em;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .intro input[type="date"],
+    .intro input[type="text"] {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 14px;
+      font-family: 'Source Sans 3', sans-serif;
+      background: #f8fafc;
+      color: #1a2a3a;
+      transition: border-color 0.2s;
+    }
+    .intro input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .intro input::placeholder { color: #a0b0c0; }
+    #workDate { width: 160px; }
+    #workerName { width: 180px; }
+    .intro-hint {
+      font-size: 12px;
+      color: var(--muted);
+      width: 100%;
+      margin: 0;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TASK GROUP (checklist blocks) ── */
+    .task-group {
+      margin-bottom: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(11,39,64,0.07);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .task-group:hover {
+      box-shadow: 0 8px 28px rgba(11,39,64,0.12);
+      border-color: rgba(0,176,255,0.35);
+    }
+    .group-header {
+      padding: 16px 20px 14px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+    .group-header:hover { background: #f7fafd; }
+    .group-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task-group h2 {
+      font-family: 'Oswald', sans-serif;
+      color: var(--primary);
+      margin: 0;
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .task-group h2 .icon { font-size: 1.1em; line-height: 1; }
+    .group-chevron {
+      color: var(--muted);
+      font-size: 18px;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .task-group.open .group-chevron { transform: rotate(180deg); }
+    .progress-container {
+      height: 4px;
+      background: var(--progress-bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, #34d399 100%);
+      width: 0%;
+      transition: width 0.4s ease;
+      border-radius: 999px;
+      box-shadow: 0 0 8px rgba(0,176,255,0.5);
+    }
+    .subtasks {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .task-group.open .subtasks { max-height: 4000px; }
+    .subtasks-inner {
+      padding: 6px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .subtask {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 9px;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      gap: 12px;
+    }
+    .subtask:hover { background: #f0f6ff; border-left-color: var(--accent); }
+    .subtask.completed { background: #f0fdf8; border-left-color: var(--success); }
+    .subtask input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer; flex-shrink: 0;
+    }
+    .subtask span {
+      font-size: 14px; color: #2a3a4a;
+      flex: 1; line-height: 1.4; font-weight: 400;
+    }
+    .subtask.completed span { text-decoration: line-through; color: #94a3b8; }
+
+    /* ── TABLE BLOCK ── */
+    .table-group {
+      margin-bottom: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(11,39,64,0.07);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .table-group:hover {
+      box-shadow: 0 8px 28px rgba(11,39,64,0.12);
+      border-color: rgba(0,176,255,0.35);
+    }
+    .table-group-header {
+      padding: 16px 20px 14px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+    .table-group-header:hover { background: #f7fafd; }
+    .table-group h2 {
+      font-family: 'Oswald', sans-serif;
+      color: var(--primary);
+      margin: 0;
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .table-group.open .group-chevron { transform: rotate(180deg); }
+
+    .table-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .table-group.open .table-body { max-height: 4000px; }
+
+    .table-inner {
+      padding: 0 16px 16px;
+    }
+
+    /* Tabs for lines */
+    .line-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .line-tab {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .line-tab:hover { background: #f0f6ff; border-color: var(--accent); color: var(--primary); }
+    .line-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(11,39,64,0.3);
+    }
+    .line-tab .tab-badge {
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 0.85em;
+      min-width: 24px;
+      text-align: center;
+    }
+    .line-tab:not(.active) .tab-badge {
+      background: rgba(0,176,255,0.12);
+      color: var(--accent);
+    }
+
+    /* Search bar inside table block */
+    .table-search {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .table-search input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Source Sans 3', sans-serif;
+      background: #f8fafc;
+      color: #1a2a3a;
+      transition: border-color 0.2s;
+    }
+    .table-search input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .table-search input::placeholder { color: #a0b0c0; }
+
+    .refresh-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .refresh-btn:hover { background: #f0f6ff; border-color: var(--accent); }
+    .refresh-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* Status box */
+    .status-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #f0fdf8;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #065f46;
+      margin-bottom: 12px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    /* Table styles */
+    .data-table-wrap {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: auto;
+      max-height: 420px;
+    }
+    .data-table {
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      background: #f0f4f9;
+      padding: 10px 14px;
+      text-align: left;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.78em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--border);
+      z-index: 10;
+    }
+    .data-table tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      color: #2a3a4a;
+    }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.15s; }
+    .data-table tbody tr:hover { background: #f7fafd; }
+    .data-table tbody tr.row-done { background: #f0fdf8; }
+    .data-table tbody tr.row-done td { color: #6b7280; }
+    .data-table tbody tr.row-wait { background: #fff8ed; }
+
+    .table-loading {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .table-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .table-error {
+      text-align: center;
+      padding: 24px;
+      color: #e11d48;
+      font-size: 14px;
+    }
+
+    /* table count */
+    .count-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0,176,255,0.1);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      color: var(--accent);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .count-chip.done { background: rgba(16,185,129,0.12); color: var(--success); }
+
+    /* ── ACTIONS BAR ── */
+    .actions {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(16px);
+      border-radius: 999px;
+      box-shadow: 0 8px 32px rgba(11,39,64,0.2);
+      border: 1px solid var(--border);
+      z-index: 999;
+      width: calc(100% - 32px);
+      max-width: 420px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 13.5px;
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #04111f;
+      border: 1px solid rgba(0,176,255,0.5);
+    }
+    .btn-primary:hover {
+      background: #19b9ff;
+      box-shadow: 0 4px 16px rgba(0,176,255,0.4);
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: #f0f6ff; border-color: var(--accent); }
+    #totalProgress {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--primary);
+      min-width: 52px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── CONFETTI ── */
+    #confetti { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1000; }
+
+    @media (max-width: 500px) {
+      h1 { font-size: 1.4em; }
+      .actions { flex-wrap: wrap; gap: 8px; justify-content: center; padding: 12px 14px; }
+      .btn { flex: 1; min-width: 120px; justify-content: center; }
+      #totalProgress { order: -1; width: 100%; font-size: 22px; }
+    }
+    @supports (padding: max(0px)) {
+      .actions { bottom: max(16px, env(safe-area-inset-bottom)); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <img src="./images/ITS_logo_horizont.png" alt="ITSSupport"
+           onerror="this.style.display='none'">
+      <span class="logo-text" id="logoFallback" style="display:none">ITSSupport</span>
+      <span class="header-title">Чек-лист смены</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>Чек-лист дежурного инженера</h1>
+
+    <!-- INTRO -->
+    <div class="intro">
+      <div class="intro-field">
+        <label>Дата</label>
+        <input type="date" id="workDate">
+      </div>
+      <div class="intro-field">
+        <label>Сотрудник</label>
+        <input type="text" id="workerName" placeholder="Введите имя">
+      </div>
+      <p class="intro-hint">Нажмите на заголовок блока чтобы раскрыть задачи · Отметьте выполненные пункты кликом</p>
+    </div>
+
+    <!-- ═══════ ЧЕКЛИСТ БЛОКИ ═══════ -->
+
+    <!-- УТРО -->
+    <div class="task-group" data-group="morning">
+      <div class="group-header">
+        <div class="group-title-row">
+          <h2><span class="icon">🕕</span> Утро (6:00–8:00)</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" data-group="morning"></div></div>
+      </div>
+      <div class="subtasks"><div class="subtasks-inner">
+        <div class="subtask">
+          <input type="checkbox" data-task-id="morning-1">
+          <span>Фотофиксация пропусков инженеров / перекличка перед началом смены</span>
+        </div>
+        <div class="subtask">
+          <input type="checkbox" data-task-id="morning-2">
+          <span>Выдача часов в окне 6:00–8:00. Проверка полок с часами</span>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ПОДГОТОВКА -->
+    <div class="task-group" data-group="prep">
+      <div class="group-header">
+        <div class="group-title-row">
+          <h2><span class="icon">⚙️</span> Подготовка к обходу</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" data-group="prep"></div></div>
+      </div>
+      <div class="subtasks"><div class="subtasks-inner">
+        <div class="subtask">
+          <input type="checkbox" data-task-id="prep-1">
+          <span>Запуск смены на часах, получение отладочного устройства</span>
+        </div>
+        <div class="subtask">
+          <input type="checkbox" data-task-id="prep-2">
+          <span>Обновление меток в мобильном приложении</span>
+        </div>
+        <div class="subtask">
+          <input type="checkbox" data-task-id="prep-3">
+          <span>Проверка рюкзака с инструментом</span>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ═══════ БЛОК ТАБЛИЦ: ЛИНИИ И КНС ═══════ -->
+    <div class="table-group" data-tgroup="lines">
+      <div class="table-group-header">
+        <div class="group-title-row">
+          <h2><span class="icon">📡</span> Обход по меткам</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" id="linesProgressBar"></div>
+        </div>
+      </div>
+      <div class="table-body">
+        <div class="table-inner">
+
+          <!-- Tabs -->
+          <div class="line-tabs">
+            <button class="line-tab active" data-line="1">
+              Линия 1 <span class="tab-badge" id="badge1">—</span>
+            </button>
+            <button class="line-tab" data-line="2">
+              Линия 2 <span class="tab-badge" id="badge2">—</span>
+            </button>
+            <button class="line-tab" data-line="kns">
+              КНС <span class="tab-badge" id="badgeKns">—</span>
+            </button>
+          </div>
+
+          <!-- Status box -->
+          <div class="status-box" id="statusBox" style="display:none">
+            <div class="status-dot"></div>
+            <span id="statusText"></span>
+          </div>
+
+          <!-- Search -->
+          <div class="table-search">
+            <input type="number" inputmode="numeric" id="tableSearch" placeholder="Поиск по № метки...">
+            <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">↺ Обновить</button>
+          </div>
+
+          <!-- Table output -->
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead id="dataThead"></thead>
+              <tbody id="dataTbody">
+                <tr><td class="table-loading" colspan="99">Загрузка данных…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Summary chips -->
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+            <span class="count-chip" id="chipTotal">Всего: —</span>
+            <span class="count-chip done" id="chipDone">Выполнено: —</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ВЕЧЕР -->
+    <div class="task-group" data-group="evening">
+      <div class="group-header">
+        <div class="group-title-row">
+          <h2><span class="icon">🌙</span> Вечер (18:00–19:30)</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" data-group="evening"></div></div>
+      </div>
+      <div class="subtasks"><div class="subtasks-inner">
+        <div class="subtask">
+          <input type="checkbox" data-task-id="evening-1">
+          <span>Сбор нарушений, фиксация в журнале</span>
+        </div>
+        <div class="subtask">
+          <input type="checkbox" data-task-id="evening-2">
+          <span>Закрытие смены / перекличка</span>
+        </div>
+      </div></div>
+    </div>
+
+  </div><!-- /container -->
+
+  <!-- Actions bar -->
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="resetAll()">↺ Сброс</button>
+    <div id="totalProgress">0%</div>
+    <button class="btn btn-primary" onclick="exportReport()">↗ Отчёт</button>
+  </div>
+
+  <canvas id="confetti"></canvas>
+
+  <script>
+    // ══════════════════════════════════════════
+    //  GOOGLE SHEETS CONFIG
+    // ══════════════════════════════════════════
+    const SHEET_ID = "1CU56AZdWC9dCvkf_z6CWMtrgfuWRCG3HYx7hp79vI_c";
+    const SHEET_NAME = "Для печати🖨️";
+    const STATUS_SHEET_NAME = "Свод_журналов_СПГ+ТСБ";
+    const STATUS_RANGE = "Q1:R2";
+
+    const GROUPS = {
+      "1":   "D2:M150",
+      "2":   "R2:Z150",
+      "kns": "AR2:AZ150"
+    };
+
+    const TRIGGER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzU7wYhYZxJu8_QvJMq174aPZ6lPeHu5PY6jqfyGbE1QgxZv0KwFVvgsDt_A2-wXUWA/exec";
+    const TRIGGER_TOKEN = "12345";
+    const STATUS_COL_NAME = "Статус обхода";
+    const STATUS_WAIT = "Ожидание получения данных";
+    const STATUS_DONE = "Данные зафиксированы";
+
+    // ══════════════════════════════════════════
+    //  CHECKLIST STATE
+    // ══════════════════════════════════════════
+    const STORAGE_KEY = 'itssupport_cl2_v1';
+
+    function saveState() {
+      const state = {
+        tasks: Array.from(document.querySelectorAll('input[type="checkbox"]'))
+          .map(cb => ({ id: cb.dataset.taskId, checked: cb.checked })),
+        date: document.getElementById('workDate').value,
+        name: document.getElementById('workerName').value,
+        groups: Array.from(document.querySelectorAll('.task-group'))
+          .map(g => ({ id: g.dataset.group, open: g.classList.contains('open') })),
+        tableOpen: document.querySelector('[data-tgroup="lines"]').classList.contains('open'),
+        currentLine: currentLine
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved) {
+          saved.tasks?.forEach(({ id, checked }) => {
+            const cb = document.querySelector(`[data-task-id="${id}"]`);
+            if (cb) { cb.checked = checked; cb.closest('.subtask').classList.toggle('completed', checked); }
+          });
+          if (saved.date) document.getElementById('workDate').value = saved.date;
+          if (saved.name) document.getElementById('workerName').value = saved.name;
+          saved.groups?.forEach(({ id, open }) => {
+            const group = document.querySelector(`[data-group="${id}"]`);
+            if (group && open) group.classList.add('open');
+          });
+          if (saved.tableOpen) document.querySelector('[data-tgroup="lines"]').classList.add('open');
+          if (saved.currentLine) currentLine = saved.currentLine;
+        }
+      } catch (e) {}
+      updateAllProgress();
+    }
+
+    function updateGroupProgress(groupId) {
+      const group = document.querySelector(`[data-group="${groupId}"]`);
+      const tasks = group.querySelectorAll('input[type="checkbox"]');
+      const checked = group.querySelectorAll('input[type="checkbox"]:checked').length;
+      const percent = tasks.length ? Math.round((checked / tasks.length) * 100) : 0;
+      group.querySelector('.progress-bar').style.width = percent + '%';
+      return { checked, total: tasks.length };
+    }
+
+    function updateAllProgress() {
+      let totalTasks = 0, totalChecked = 0;
+      document.querySelectorAll('.task-group').forEach(group => {
+        const { checked, total } = updateGroupProgress(group.dataset.group);
+        totalTasks += total;
+        totalChecked += checked;
+      });
+      const pct = totalTasks ? Math.round((totalChecked / totalTasks) * 100) : 0;
+      document.getElementById('totalProgress').textContent = pct + '%';
+      if (pct === 100) showConfetti();
+    }
+
+    function resetAll() {
+      if (!confirm('Сбросить весь чек-лист?')) return;
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+        cb.closest('.subtask').classList.remove('completed');
+      });
+      updateAllProgress();
+      saveState();
+    }
+
+    // ══════════════════════════════════════════
+    //  TABLE / LINES STATE
+    // ══════════════════════════════════════════
+    let currentLine = "1";
+    let lineData = { "1": null, "2": null, "kns": null };
+    let labelCounts = {
+      "1":   { total: 0, done: 0 },
+      "2":   { total: 0, done: 0 },
+      "kns": { total: 0, done: 0 }
+    };
+
+    function norm(s) { return String(s ?? "").toLowerCase().replace(/\s/g, ""); }
+    function cellText(v) { return (v === null || v === undefined) ? "" : String(v); }
+    function isIntLike(s) { return /^[0-9]+$/.test(String(s).trim()); }
+    function esc(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m]));
+    }
+
+    function updateBadges() {
+      ["1","2","kns"].forEach(k => {
+        const id = k === "kns" ? "badgeKns" : "badge" + k;
+        const el = document.getElementById(id);
+        const info = labelCounts[k];
+        el.textContent = info.total > 0 ? `${info.done}/${info.total}` : "—";
+      });
+      // update lines progress bar
+      let total = 0, done = 0;
+      Object.values(labelCounts).forEach(v => { total += v.total; done += v.done; });
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById("linesProgressBar").style.width = pct + '%';
+    }
+
+    async function loadLine(lineKey, force = false) {
+      if (lineData[lineKey] && !force) {
+        renderLine(lineKey);
+        return;
+      }
+      setTableContent(`<tr><td class="table-loading" colspan="99">Загрузка…</td></tr>`);
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&range=${encodeURIComponent(GROUPS[lineKey])}&headers=1&t=${Date.now()}`;
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const table = json.table;
+        const headers = table.cols.map(c => cellText(c.label || ""));
+        let rows = table.rows
+          .map(r => (r.c || []).map(c => cellText(c ? c.v : "")))
+          .filter(row => row.some(c => c.trim() !== ""));
+
+        const labelIdx = headers.findIndex(h => norm(h).includes("метк"));
+        const statusIdx = headers.findIndex(h => norm(h) === norm(STATUS_COL_NAME));
+
+        // Sort: wait first, done last
+        if (statusIdx !== -1) {
+          rows.sort((a, b) => {
+            const rank = v => {
+              const s = v.trim();
+              if (s === STATUS_WAIT) return 0;
+              if (s === STATUS_DONE) return 1;
+              return 2;
+            };
+            return rank(a[statusIdx]) - rank(b[statusIdx]);
+          });
+        }
+
+        labelCounts[lineKey] = {
+          total: rows.filter(r => labelIdx !== -1 && isIntLike(r[labelIdx])).length,
+          done: rows.filter(r => statusIdx !== -1 && r[statusIdx].trim() === STATUS_DONE).length
+        };
+
+        lineData[lineKey] = { headers, rows, labelIdx, statusIdx };
+        updateBadges();
+        renderLine(lineKey);
+      } catch(e) {
+        setTableContent(`<tr><td class="table-error" colspan="99">Ошибка загрузки данных</td></tr>`);
+      }
+    }
+
+    function renderLine(lineKey) {
+      const data = lineData[lineKey];
+      if (!data) return;
+      const { headers, rows, labelIdx, statusIdx } = data;
+      const q = document.getElementById("tableSearch").value.trim().toLowerCase();
+      const filtered = rows.filter(r => !q || (labelIdx !== -1 && r[labelIdx].toLowerCase().includes(q)));
+
+      // Thead
+      document.getElementById("dataThead").innerHTML =
+        `<tr>${headers.map(h => `<th>${esc(h || '—')}</th>`).join('')}</tr>`;
+
+      if (filtered.length === 0) {
+        setTableContent(`<tr><td class="table-empty" colspan="${headers.length}">Нет данных</td></tr>`);
+      } else {
+        document.getElementById("dataTbody").innerHTML = filtered.map(row => {
+          const isDone = statusIdx !== -1 && row[statusIdx].trim() === STATUS_DONE;
+          const isWait = statusIdx !== -1 && row[statusIdx].trim() === STATUS_WAIT;
+          const cls = isDone ? 'row-done' : (isWait ? 'row-wait' : '');
+          return `<tr class="${cls}">${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`;
+        }).join('');
+      }
+
+      // Chips
+      const info = labelCounts[lineKey];
+      document.getElementById("chipTotal").textContent = `Всего: ${info.total}`;
+      document.getElementById("chipDone").textContent = `Выполнено: ${info.done}`;
+    }
+
+    function setTableContent(html) {
+      document.getElementById("dataTbody").innerHTML = html;
+      document.getElementById("dataThead").innerHTML = "";
+    }
+
+    async function loadStatusBox() {
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(STATUS_SHEET_NAME)}&range=${encodeURIComponent(STATUS_RANGE)}&headers=0&t=${Date.now()}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const lines = json.table.rows.map(r => r.c.map(c => cellText(c?.v)).filter(Boolean).join(" ")).filter(Boolean);
+        const box = document.getElementById("statusBox");
+        if (lines.length) {
+          document.getElementById("statusText").textContent = lines.join(" · ");
+          box.style.display = "flex";
+        } else {
+          box.style.display = "none";
+        }
+      } catch { document.getElementById("statusBox").style.display = "none"; }
+    }
+
+    async function refreshData() {
+      const btn = document.getElementById("refreshBtn");
+      btn.disabled = true; btn.textContent = "⌛";
+      // Trigger webapp
+      (new Image()).src = `${TRIGGER_WEBAPP_URL}?token=${TRIGGER_TOKEN}&t=${Date.now()}`;
+      lineData[currentLine] = null; // force reload
+      setTimeout(async () => {
+        await loadLine(currentLine, true);
+        await loadStatusBox();
+        btn.disabled = false; btn.textContent = "↺ Обновить";
+      }, 3000);
+    }
+
+    function switchLine(lineKey) {
+      currentLine = lineKey;
+      document.querySelectorAll('.line-tab').forEach(t => t.classList.toggle('active', t.dataset.line === lineKey));
+      document.getElementById("tableSearch").value = "";
+      loadLine(lineKey);
+      saveState();
+    }
+
+    // ══════════════════════════════════════════
+    //  EXPORT REPORT
+    // ══════════════════════════════════════════
+    function exportReport() {
+      const name = document.getElementById('workerName').value || 'Инженер';
+      const date = document.getElementById('workDate').value || new Date().toLocaleDateString('ru-RU');
+      const progress = document.getElementById('totalProgress').textContent;
+
+      let report = `📋 ITSSupport — Чек-лист дежурного\n`;
+      report += `👤 ${name}   📅 ${date}\n`;
+      report += `✅ Выполнено: ${progress}\n\n`;
+
+      report += `📡 Обход по меткам:\n`;
+      ["1","2","kns"].forEach(k => {
+        const label = k === "kns" ? "КНС" : `Линия ${k}`;
+        const info = labelCounts[k];
+        report += `  ${info.done === info.total && info.total > 0 ? '✅' : '⬜'} ${label}: ${info.done}/${info.total}\n`;
+      });
+
+      report += `\n📁 Блоки чек-листа:\n`;
+      document.querySelectorAll('.task-group').forEach(group => {
+        const title = group.querySelector('h2').textContent.trim();
+        const bar = group.querySelector('.progress-bar').style.width || '0%';
+        report += `  ${bar === '100%' ? '✅' : '⬜'} ${title} [${bar}]\n`;
+      });
+
+      navigator.clipboard.writeText(report)
+        .then(() => alert('✅ Отчёт скопирован!\nВставьте в Telegram или другой чат.'))
+        .catch(() => prompt('Скопируйте отчёт:', report));
+    }
+
+    // ══════════════════════════════════════════
+    //  CONFETTI
+    // ══════════════════════════════════════════
+    function showConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const pieces = [];
+      const colors = ['#00b0ff','#34d399','#f59e0b','#f87171','#a78bfa'];
+      for (let i = 0; i < 120; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width, y: -10,
+          vx: (Math.random() - 0.5) * 8, vy: Math.random() * 5 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 7 + 3,
+          rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 8
+        });
+      }
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach((p, i) => {
+          p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.rot += p.rotV;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+          ctx.restore();
+          if (p.y > canvas.height) pieces.splice(i, 1);
+        });
+        if (pieces.length) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      animate();
+    }
+
+    // ══════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('workDate').valueAsDate = new Date();
+
+      // Logo fallback
+      const logo = document.querySelector('header img');
+      if (logo) logo.addEventListener('error', () => {
+        logo.style.display = 'none';
+        document.getElementById('logoFallback').style.display = 'inline';
+      });
+
+      loadState();
+
+      // Toggle checklist groups
+      document.querySelectorAll('.group-header').forEach(header => {
+        header.addEventListener('click', () => {
+          header.parentElement.classList.toggle('open');
+          saveState();
+        });
+      });
+
+      // Subtask clicks
+      document.querySelectorAll('.subtask').forEach(subtask => {
+        subtask.addEventListener('click', function(e) {
+          const checkbox = this.querySelector('input[type="checkbox"]');
+          if (e.target !== checkbox && checkbox) {
+            checkbox.checked = !checkbox.checked;
+            this.classList.toggle('completed', checkbox.checked);
+          }
+          saveState();
+          updateAllProgress();
+        });
+      });
+
+      // Table group toggle
+      const tableGroupHeader = document.querySelector('.table-group-header');
+      const tableGroup = document.querySelector('[data-tgroup="lines"]');
+      tableGroupHeader.addEventListener('click', () => {
+        const wasOpen = tableGroup.classList.contains('open');
+        tableGroup.classList.toggle('open');
+        if (!wasOpen) {
+          // Load all lines for badge counts
+          ["1","2","kns"].forEach(k => { if (!lineData[k]) loadLine(k); });
+          loadStatusBox();
+        }
+        saveState();
+      });
+
+      // Line tabs
+      document.querySelectorAll('.line-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchLine(tab.dataset.line));
+      });
+
+      // Search
+      document.getElementById('tableSearch').addEventListener('input', () => {
+        renderLine(currentLine);
+      });
+
+      // Auto-load if table was open
+      if (document.querySelector('[data-tgroup="lines"]').classList.contains('open')) {
+        ["1","2","kns"].forEach(k => loadLine(k));
+        loadStatusBox();
+      }
+
+      // Intro fields save
+      document.getElementById('workDate').addEventListener('change', saveState);
+      document.getElementById('workerName').addEventListener('input', saveState);
+    });
+
+    window.addEventListener('beforeunload', saveState);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) saveState(); });
+  </script>
+</body>
+</html>
