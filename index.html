@@ -470,18 +470,18 @@
     .actions {
       position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
       display: flex;
-      gap: 10px;
-      padding: 10px 16px;
+      gap: 16px;
+      padding: 10px 20px;
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(16px);
       border-radius: 999px;
       box-shadow: 0 8px 32px rgba(11,39,64,0.2);
       border: 1px solid var(--border);
       z-index: 999;
-      width: calc(100% - 32px);
-      max-width: 420px;
+      width: auto;
+      max-width: 320px;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
     }
     .btn {
       padding: 9px 20px;
@@ -697,7 +697,6 @@
 
   <!-- Actions bar -->
   <div class="actions">
-    <button class="btn btn-ghost" onclick="resetAll()">↺ Сброс</button>
     <div id="totalProgress">0%</div>
     <button class="btn btn-primary" onclick="exportReport()">↗ Отчёт</button>
   </div>
@@ -881,18 +880,35 @@
       const q = document.getElementById("tableSearch").value.trim().toLowerCase();
       const filtered = rows.filter(r => !q || (labelIdx !== -1 && r[labelIdx].toLowerCase().includes(q)));
 
+      // Определяем 4 нужных колонки по ключевым словам в заголовках
+      const colMatchers = [
+        { label: '№ метки',          match: h => norm(h).includes('метк') },
+        { label: 'Наименование зоны', match: h => norm(h).includes('наим') || norm(h).includes('зон') || norm(h).includes('тип') },
+        { label: 'Описание',          match: h => norm(h).includes('опис') },
+        { label: 'Статус обхода',     match: h => norm(h) === norm(STATUS_COL_NAME) || norm(h).includes('стат') },
+      ];
+
+      const colIdxs = colMatchers.map(m => {
+        const idx = headers.findIndex(m.match);
+        return { label: m.label, idx };
+      }).filter(c => c.idx !== -1);
+
+      // Fallback: если не нашли — показываем всё
+      const displayCols = colIdxs.length >= 2 ? colIdxs : headers.map((h, i) => ({ label: h || '—', idx: i }));
+      const colCount = displayCols.length;
+
       // Thead
       document.getElementById("dataThead").innerHTML =
-        `<tr>${headers.map(h => `<th>${esc(h || '—')}</th>`).join('')}</tr>`;
+        `<tr>${displayCols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr>`;
 
       if (filtered.length === 0) {
-        setTableContent(`<tr><td class="table-empty" colspan="${headers.length}">Нет данных</td></tr>`);
+        setTableContent(`<tr><td class="table-empty" colspan="${colCount}">Нет данных</td></tr>`);
       } else {
         document.getElementById("dataTbody").innerHTML = filtered.map(row => {
           const isDone = statusIdx !== -1 && row[statusIdx].trim() === STATUS_DONE;
           const isWait = statusIdx !== -1 && row[statusIdx].trim() === STATUS_WAIT;
           const cls = isDone ? 'row-done' : (isWait ? 'row-wait' : '');
-          return `<tr class="${cls}">${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`;
+          return `<tr class="${cls}">${displayCols.map(c => `<td>${esc(row[c.idx] ?? '')}</td>`).join('')}</tr>`;
         }).join('');
       }
 
