@@ -59,13 +59,6 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    header img {
-      height: 36px;
-      width: auto;
-      max-width: 160px;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-    }
     .header-title {
       font-family: 'Oswald', sans-serif;
       font-size: 0.75em;
@@ -80,7 +73,7 @@
     /* ── CONTAINER ── */
     .container {
       max-width: 960px;
-      margin: 0 auto 40px auto;
+      margin: 0 auto 120px auto;
       padding: 24px 20px;
     }
 
@@ -473,159 +466,62 @@
     }
     .count-chip.done { background: rgba(16,185,129,0.12); color: var(--success); }
 
-    /* ── TAG EVENTS ── */
-    .tag-events {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* ── ACTIONS BAR ── */
+    .actions {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      display: flex;
       gap: 10px;
-      margin-top: 14px;
-    }
-    @media (max-width: 540px) {
-      .tag-events { grid-template-columns: 1fr; }
-    }
-    .tag-event-block {
-      border-radius: 10px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(16px);
+      border-radius: 999px;
+      box-shadow: 0 8px 32px rgba(11,39,64,0.2);
       border: 1px solid var(--border);
-      padding: 12px 14px;
-      background: #f8fafc;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .tag-event-new { border-left: 3px solid var(--success); }
-    .tag-event-lost { border-left: 3px solid #f87171; }
-
-    .tag-event-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .tag-event-icon {
-      font-size: 15px;
-      font-weight: 700;
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-family: 'Oswald', sans-serif;
-    }
-    .tag-event-new .tag-event-icon { background: rgba(16,185,129,0.15); color: var(--success); }
-    .tag-event-lost .tag-event-icon { background: rgba(248,113,113,0.15); color: #e11d48; }
-
-    .tag-event-title {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.82em;
-      font-weight: 600;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--primary);
-      flex: 1;
-    }
-    .tag-event-counter {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tag-event-counter span {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 700;
-      font-size: 1.15em;
-      min-width: 24px;
-      text-align: center;
-      color: var(--primary);
-    }
-    .counter-btn {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--primary);
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s;
-      line-height: 1;
-      padding: 0;
-    }
-    .counter-btn:hover { background: #f0f6ff; border-color: var(--accent); }
-
-    .tag-event-notes {
-      width: 100%;
-      min-height: 56px;
-      resize: vertical;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      font-size: 13px;
-      font-family: 'Source Sans 3', sans-serif;
-      background: #fff;
-      color: #1a2a3a;
-      transition: border-color 0.2s;
-      line-height: 1.4;
-    }
-    .tag-event-notes:focus { outline: none; border-color: var(--accent); }
-    .tag-event-notes::placeholder { color: #a0b0c0; }
-
-    /* ── REPORT SECTION ── */
-    .report-section {
-      margin-top: 8px;
-      background: var(--glass-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 16px rgba(11,39,64,0.07);
-      padding: 20px 24px;
-      display: flex;
+      z-index: 999;
+      width: calc(100% - 32px);
+      max-width: 420px;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
     }
-    .report-line-info {
-      font-size: 14px;
-      color: var(--muted);
-      flex: 1;
-      min-width: 180px;
-    }
-    .report-line-info strong {
-      color: var(--primary);
-      font-weight: 600;
-    }
-    .report-line-info .pct {
-      font-family: 'Oswald', sans-serif;
-      font-size: 1.5em;
-      font-weight: 700;
-      color: var(--accent);
-      margin-right: 6px;
-    }
-    .report-line-info .pct.pct-done { color: var(--success); }
-    .btn-report {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.95em;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-weight: 600;
-      padding: 11px 24px;
-      border-radius: 999px;
+    .btn {
+      padding: 9px 20px;
       border: none;
-      background: var(--accent);
-      color: #04111f;
+      border-radius: 999px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      white-space: nowrap;
-      flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(0,176,255,0.3);
+      font-size: 13.5px;
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
-    .btn-report:hover:not(:disabled) {
+    .btn-primary {
+      background: var(--accent);
+      color: #04111f;
+      border: 1px solid rgba(0,176,255,0.5);
+    }
+    .btn-primary:hover {
       background: #19b9ff;
-      box-shadow: 0 6px 20px rgba(0,176,255,0.45);
+      box-shadow: 0 4px 16px rgba(0,176,255,0.4);
       transform: translateY(-1px);
     }
-    .btn-report:disabled {
-      background: var(--progress-bg);
-      color: var(--muted);
-      box-shadow: none;
-      cursor: default;
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: #f0f6ff; border-color: var(--accent); }
+    #totalProgress {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--primary);
+      min-width: 52px;
+      text-align: center;
+      letter-spacing: 0.02em;
     }
 
     /* ── CONFETTI ── */
@@ -654,6 +550,8 @@
   </header>
 
   <div class="container">
+    <h1>Чек-лист дежурного инженера</h1>
+
     <!-- INTRO -->
     <div class="intro">
       <div class="intro-field">
@@ -673,7 +571,7 @@
     <div class="task-group" data-group="morning">
       <div class="group-header">
         <div class="group-title-row">
-          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><path d="M12 2v4M4.93 7.93l2.83 2.83M2 16h4M18 16h4M16.24 10.76l2.83-2.83M5 16a7 7 0 0 1 14 0"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> Утро (6:00–8:00)</h2>
+          <h2><span class="icon">🕕</span> Утро (6:00–8:00)</h2>
           <span class="group-chevron">▼</span>
         </div>
         <div class="progress-container"><div class="progress-bar" data-group="morning"></div></div>
@@ -681,11 +579,11 @@
       <div class="subtasks"><div class="subtasks-inner">
         <div class="subtask">
           <input type="checkbox" data-task-id="morning-1">
-          <span>Перекличка перед началом смены</span>
+          <span>Фотофиксация пропусков инженеров / перекличка перед началом смены</span>
         </div>
         <div class="subtask">
           <input type="checkbox" data-task-id="morning-2">
-          <span>Выдача часов в окне 6:00–8:00. Уборка полок с часами</span>
+          <span>Выдача часов в окне 6:00–8:00. Проверка полок с часами</span>
         </div>
       </div></div>
     </div>
@@ -694,7 +592,7 @@
     <div class="task-group" data-group="prep">
       <div class="group-header">
         <div class="group-title-row">
-          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Подготовка к обходу</h2>
+          <h2><span class="icon">⚙️</span> Подготовка к обходу</h2>
           <span class="group-chevron">▼</span>
         </div>
         <div class="progress-container"><div class="progress-bar" data-group="prep"></div></div>
@@ -719,7 +617,7 @@
     <div class="table-group" data-tgroup="lines">
       <div class="table-group-header">
         <div class="group-title-row">
-          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg></span> Обход по меткам</h2>
+          <h2><span class="icon">📡</span> Обход по меткам</h2>
           <span class="group-chevron">▼</span>
         </div>
         <div class="progress-container">
@@ -735,7 +633,7 @@
               Линия 1 <span class="tab-badge" id="badge1">—</span>
             </button>
             <button class="line-tab" data-line="2">
-              Линия 3 <span class="tab-badge" id="badge2">—</span>
+              Линия 2 <span class="tab-badge" id="badge2">—</span>
             </button>
             <button class="line-tab" data-line="kns">
               КНС <span class="tab-badge" id="badgeKns">—</span>
@@ -774,53 +672,11 @@
       </div>
     </div>
 
-    <!-- МЕТКИ: НОВЫЕ И ПОТЕРЯННЫЕ -->
-    <div class="task-group" data-group="tag-events-block">
-      <div class="group-header">
-        <div class="group-title-row">
-          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Изменения по меткам</h2>
-          <span class="group-chevron">▼</span>
-        </div>
-        <div class="progress-container"><div class="progress-bar" data-group="tag-events-block" style="width:0%"></div></div>
-      </div>
-      <div class="subtasks"><div class="subtasks-inner">
-        <div class="tag-events">
-
-          <div class="tag-event-block tag-event-new">
-            <div class="tag-event-header">
-              <span class="tag-event-icon">＋</span>
-              <span class="tag-event-title">Новые метки</span>
-              <div class="tag-event-counter">
-                <button class="counter-btn" onclick="changeCount('new', -1)">−</button>
-                <span id="countNew">0</span>
-                <button class="counter-btn" onclick="changeCount('new', 1)">＋</button>
-              </div>
-            </div>
-            <textarea id="notesNew" class="tag-event-notes" placeholder="Номера новых меток через запятую: 101, 205, 318..."></textarea>
-          </div>
-
-          <div class="tag-event-block tag-event-lost">
-            <div class="tag-event-header">
-              <span class="tag-event-icon">−</span>
-              <span class="tag-event-title">Потерянные метки</span>
-              <div class="tag-event-counter">
-                <button class="counter-btn" onclick="changeCount('lost', -1)">−</button>
-                <span id="countLost">0</span>
-                <button class="counter-btn" onclick="changeCount('lost', 1)">＋</button>
-              </div>
-            </div>
-            <textarea id="notesLost" class="tag-event-notes" placeholder="Номера потерянных меток через запятую: 42, 77..."></textarea>
-          </div>
-
-        </div>
-      </div></div>
-    </div>
-
     <!-- ВЕЧЕР -->
     <div class="task-group" data-group="evening">
       <div class="group-header">
         <div class="group-title-row">
-          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span> Вечер (18:00–19:30)</h2>
+          <h2><span class="icon">🌙</span> Вечер (18:00–19:30)</h2>
           <span class="group-chevron">▼</span>
         </div>
         <div class="progress-container"><div class="progress-bar" data-group="evening"></div></div>
@@ -837,17 +693,14 @@
       </div></div>
     </div>
 
-    <!-- ОТЧЁТ -->
-    <div class="report-section">
-      <div class="report-line-info" id="reportLineInfo">
-        Выберите маршрут в блоке «Обход по меткам» для формирования отчёта
-      </div>
-      <button class="btn btn-report" id="reportBtn" onclick="exportReport()" disabled>
-        ↗ Сформировать отчёт
-      </button>
-    </div>
-
   </div><!-- /container -->
+
+  <!-- Actions bar -->
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="resetAll()">↺ Сброс</button>
+    <div id="totalProgress">0%</div>
+    <button class="btn btn-primary" onclick="exportReport()">↗ Отчёт</button>
+  </div>
 
   <canvas id="confetti"></canvas>
 
@@ -861,9 +714,9 @@
     const STATUS_RANGE = "Q1:R2";
 
     const GROUPS = {
-      "1":   "D2:M200",
-      "2":   "R2:Z200",
-      "kns": "AD2:AM200"
+      "1":   "D2:M150",
+      "2":   "R2:Z150",
+      "kns": "AR2:AZ150"
     };
 
     const TRIGGER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzU7wYhYZxJu8_QvJMq174aPZ6lPeHu5PY6jqfyGbE1QgxZv0KwFVvgsDt_A2-wXUWA/exec";
@@ -886,11 +739,7 @@
         groups: Array.from(document.querySelectorAll('.task-group'))
           .map(g => ({ id: g.dataset.group, open: g.classList.contains('open') })),
         tableOpen: document.querySelector('[data-tgroup="lines"]').classList.contains('open'),
-        currentLine: currentLine,
-        countNew: document.getElementById('countNew').textContent,
-        countLost: document.getElementById('countLost').textContent,
-        notesNew: document.getElementById('notesNew').value,
-        notesLost: document.getElementById('notesLost').value
+        currentLine: currentLine
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
@@ -910,11 +759,10 @@
             if (group && open) group.classList.add('open');
           });
           if (saved.tableOpen) document.querySelector('[data-tgroup="lines"]').classList.add('open');
-          if (saved.currentLine) currentLine = saved.currentLine;
-          if (saved.countNew) document.getElementById('countNew').textContent = saved.countNew;
-          if (saved.countLost) document.getElementById('countLost').textContent = saved.countLost;
-          if (saved.notesNew) document.getElementById('notesNew').value = saved.notesNew;
-          if (saved.notesLost) document.getElementById('notesLost').value = saved.notesLost;
+          if (saved.currentLine) {
+            currentLine = saved.currentLine;
+            document.querySelectorAll('.line-tab').forEach(t => t.classList.toggle('active', t.dataset.line === saved.currentLine));
+          }
         }
       } catch (e) {}
       updateAllProgress();
@@ -930,36 +778,15 @@
     }
 
     function updateAllProgress() {
+      let totalTasks = 0, totalChecked = 0;
       document.querySelectorAll('.task-group').forEach(group => {
-        if (group.dataset.group === 'tag-events-block') return;
-        updateGroupProgress(group.dataset.group);
+        const { checked, total } = updateGroupProgress(group.dataset.group);
+        totalTasks += total;
+        totalChecked += checked;
       });
-    }
-
-    function changeCount(type, delta) {
-      const el = document.getElementById(type === 'new' ? 'countNew' : 'countLost');
-      const current = parseInt(el.textContent) || 0;
-      el.textContent = Math.max(0, current + delta);
-      saveState();
-    }
-
-    function updateReportSection() {
-      const info = labelCounts[currentLine];
-      const infoEl = document.getElementById("reportLineInfo");
-      const btn = document.getElementById("reportBtn");
-
-      if (!info || info.total === 0) {
-        infoEl.innerHTML = `Откройте блок «Обход по меткам» и выберите маршрут`;
-        btn.disabled = true;
-        return;
-      }
-
-      const pct = Math.round((info.done / info.total) * 100);
-      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
-      const isDone = pct === 100;
-
-      infoEl.innerHTML = `<span class="pct ${isDone ? 'pct-done' : ''}">${pct}%</span> <strong>${lineLabel}</strong> — выполнено ${info.done} из ${info.total} меток`;
-      btn.disabled = false;
+      const pct = totalTasks ? Math.round((totalChecked / totalTasks) * 100) : 0;
+      document.getElementById('totalProgress').textContent = pct + '%';
+      if (pct === 100) showConfetti();
     }
 
     function resetAll() {
@@ -1043,9 +870,8 @@
         };
 
         lineData[lineKey] = { headers, rows, labelIdx, statusIdx };
-      updateBadges();
-        updateReportSection();
-        renderLine(lineKey);
+        updateBadges();
+        if (lineKey === currentLine) renderLine(lineKey);
       } catch(e) {
         setTableContent(`<tr><td class="table-error" colspan="99">Ошибка загрузки данных</td></tr>`);
       }
@@ -1056,37 +882,20 @@
       if (!data) return;
       const { headers, rows, labelIdx, statusIdx } = data;
       const q = document.getElementById("tableSearch").value.trim().toLowerCase();
-      const filtered = rows.filter(r => !q || (labelIdx !== -1 && r[labelIdx].toLowerCase().includes(q)));
-
-      // Определяем 4 нужных колонки по ключевым словам в заголовках
-      const colMatchers = [
-        { label: '№ метки',          match: h => norm(h).includes('метк') },
-        { label: 'Наименование зоны исходя из типа', match: h => norm(h).includes('наим') && (norm(h).includes('зон') || norm(h).includes('тип')) },
-        { label: 'Описание',          match: h => norm(h).includes('опис') },
-        { label: 'Статус обхода',     match: h => norm(h) === norm(STATUS_COL_NAME) || norm(h).includes('стат') },
-      ];
-
-      const colIdxs = colMatchers.map(m => {
-        const idx = headers.findIndex(m.match);
-        return { label: m.label, idx };
-      }).filter(c => c.idx !== -1);
-
-      // Fallback: если не нашли — показываем всё
-      const displayCols = colIdxs.length >= 2 ? colIdxs : headers.map((h, i) => ({ label: h || '—', idx: i }));
-      const colCount = displayCols.length;
+      const filtered = rows.filter(r => !q || (labelIdx !== -1 && (r[labelIdx] ?? '').toLowerCase().includes(q)));
 
       // Thead
       document.getElementById("dataThead").innerHTML =
-        `<tr>${displayCols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr>`;
+        `<tr>${headers.map(h => `<th>${esc(h || '—')}</th>`).join('')}</tr>`;
 
       if (filtered.length === 0) {
-        setTableContent(`<tr><td class="table-empty" colspan="${colCount}">Нет данных</td></tr>`);
+        setTableContent(`<tr><td class="table-empty" colspan="${headers.length}">Нет данных</td></tr>`);
       } else {
         document.getElementById("dataTbody").innerHTML = filtered.map(row => {
           const isDone = statusIdx !== -1 && row[statusIdx].trim() === STATUS_DONE;
           const isWait = statusIdx !== -1 && row[statusIdx].trim() === STATUS_WAIT;
           const cls = isDone ? 'row-done' : (isWait ? 'row-wait' : '');
-          return `<tr class="${cls}">${displayCols.map(c => `<td>${esc(row[c.idx] ?? '')}</td>`).join('')}</tr>`;
+          return `<tr class="${cls}">${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`;
         }).join('');
       }
 
@@ -1136,7 +945,6 @@
       document.querySelectorAll('.line-tab').forEach(t => t.classList.toggle('active', t.dataset.line === lineKey));
       document.getElementById("tableSearch").value = "";
       loadLine(lineKey);
-      updateReportSection();
       saveState();
     }
 
@@ -1146,31 +954,25 @@
     function exportReport() {
       const name = document.getElementById('workerName').value || 'Инженер';
       const date = document.getElementById('workDate').value || new Date().toLocaleDateString('ru-RU');
-      const info = labelCounts[currentLine];
-      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
-      const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
+      const progress = document.getElementById('totalProgress').textContent;
 
-      let report = `📅 ${date}\n`;
-      report += `Отчёт по обходу:\n`;
-      report += `${name}\n`;
-      report += `Маршрут: ${lineLabel}\n`;
-      report += `Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
+      let report = `📋 ITSSupport — Чек-лист дежурного\n`;
+      report += `👤 ${name}   📅 ${date}\n`;
+      report += `✅ Выполнено: ${progress}\n\n`;
 
-      const countNew = parseInt(document.getElementById('countNew').textContent) || 0;
-      const countLost = parseInt(document.getElementById('countLost').textContent) || 0;
-      const notesNew = document.getElementById('notesNew').value.trim();
-      const notesLost = document.getElementById('notesLost').value.trim();
+      report += `📡 Обход по меткам:\n`;
+      ["1","2","kns"].forEach(k => {
+        const label = k === "kns" ? "КНС" : `Линия ${k}`;
+        const info = labelCounts[k];
+        report += `  ${info.done === info.total && info.total > 0 ? '✅' : '⬜'} ${label}: ${info.done}/${info.total}\n`;
+      });
 
-      if (countNew > 0) {
-        report += `\nНовые метки: ${countNew} шт.`;
-        if (notesNew) report += `\nНомера: ${notesNew}`;
-        report += `\n`;
-      }
-      if (countLost > 0) {
-        report += `\nПотерянные метки: ${countLost} шт.`;
-        if (notesLost) report += `\nНомера: ${notesLost}`;
-        report += `\n`;
-      }
+      report += `\n📁 Блоки чек-листа:\n`;
+      document.querySelectorAll('.task-group').forEach(group => {
+        const title = group.querySelector('h2').textContent.trim();
+        const bar = group.querySelector('.progress-bar').style.width || '0%';
+        report += `  ${bar === '100%' ? '✅' : '⬜'} ${title} [${bar}]\n`;
+      });
 
       navigator.clipboard.writeText(report)
         .then(() => alert('✅ Отчёт скопирован!\nВставьте в Telegram или другой чат.'))
@@ -1265,9 +1067,10 @@
         tab.addEventListener('click', () => switchLine(tab.dataset.line));
       });
 
-      // Tag event notes autosave
-      document.getElementById('notesNew').addEventListener('input', saveState);
-      document.getElementById('notesLost').addEventListener('input', saveState);
+      // Search
+      document.getElementById('tableSearch').addEventListener('input', () => {
+        renderLine(currentLine);
+      });
 
       // Auto-load if table was open
       if (document.querySelector('[data-tgroup="lines"]').classList.contains('open')) {
