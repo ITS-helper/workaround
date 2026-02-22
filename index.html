@@ -740,6 +740,9 @@
             <button class="line-tab" data-line="kns">
               КНС <span class="tab-badge" id="badgeKns">—</span>
             </button>
+            <button class="line-tab" data-line="night">
+              Ночь <span class="tab-badge" id="badgeNight">—</span>
+            </button>
           </div>
 
           <!-- Status box -->
@@ -861,9 +864,10 @@
     const STATUS_RANGE = "Q1:R2";
 
     const GROUPS = {
-      "1":   "D2:M200",
-      "2":   "R2:Z200",
-      "kns": "AD2:AM200"
+      "1":     "D2:M200",
+      "2":     "R2:Z200",
+      "kns":   "AD2:AM200",
+      "night": "AQ2:AZ200"
     };
 
     const TRIGGER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzU7wYhYZxJu8_QvJMq174aPZ6lPeHu5PY6jqfyGbE1QgxZv0KwFVvgsDt_A2-wXUWA/exec";
@@ -955,7 +959,7 @@
       }
 
       const pct = Math.round((info.done / info.total) * 100);
-      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
+      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : currentLine === "night" ? "Ночь" : `Линия ${currentLine}`;
       const isDone = pct === 100;
 
       infoEl.innerHTML = `<span class="pct ${isDone ? 'pct-done' : ''}">${pct}%</span> <strong>${lineLabel}</strong> — выполнено ${info.done} из ${info.total} меток`;
@@ -976,11 +980,12 @@
     //  TABLE / LINES STATE
     // ══════════════════════════════════════════
     let currentLine = "1";
-    let lineData = { "1": null, "2": null, "kns": null };
+    let lineData = { "1": null, "2": null, "kns": null, "night": null };
     let labelCounts = {
-      "1":   { total: 0, done: 0 },
-      "2":   { total: 0, done: 0 },
-      "kns": { total: 0, done: 0 }
+      "1":     { total: 0, done: 0 },
+      "2":     { total: 0, done: 0 },
+      "kns":   { total: 0, done: 0 },
+      "night": { total: 0, done: 0 }
     };
 
     function norm(s) { return String(s ?? "").toLowerCase().replace(/\s/g, ""); }
@@ -991,8 +996,8 @@
     }
 
     function updateBadges() {
-      ["1","2","kns"].forEach(k => {
-        const id = k === "kns" ? "badgeKns" : "badge" + k;
+      ["1","2","kns","night"].forEach(k => {
+        const id = k === "kns" ? "badgeKns" : k === "night" ? "badgeNight" : "badge" + k;
         const el = document.getElementById(id);
         const info = labelCounts[k];
         el.textContent = info.total > 0 ? `${info.done}/${info.total}` : "—";
@@ -1147,7 +1152,7 @@
       const name = document.getElementById('workerName').value || 'Инженер';
       const date = document.getElementById('workDate').value || new Date().toLocaleDateString('ru-RU');
       const info = labelCounts[currentLine];
-      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : `Линия ${currentLine}`;
+      const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : currentLine === "night" ? "Ночь" : `Линия ${currentLine}`;
       const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
 
       let report = `📅 ${date}\n`;
@@ -1254,7 +1259,7 @@
         tableGroup.classList.toggle('open');
         if (!wasOpen) {
           // Load all lines for badge counts
-          ["1","2","kns"].forEach(k => { if (!lineData[k]) loadLine(k); });
+          ["1","2","kns","night"].forEach(k => { if (!lineData[k]) loadLine(k); });
           loadStatusBox();
         }
         saveState();
@@ -1271,7 +1276,7 @@
 
       // Auto-load if table was open
       if (document.querySelector('[data-tgroup="lines"]').classList.contains('open')) {
-        ["1","2","kns"].forEach(k => loadLine(k));
+        ["1","2","kns","night"].forEach(k => loadLine(k));
         loadStatusBox();
       }
 
