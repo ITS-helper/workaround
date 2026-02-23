@@ -291,13 +291,13 @@
         <input type="date" id="workDate">
       </div>
       <div class="intro-field">
-        <label>Сотрудник</label>
-        <input type="text" id="workerName" placeholder="Введите имя">
+        <label>Команда</label>
+        <input type="text" id="workerName" placeholder="Введите название команды">
       </div>
       <p class="intro-hint">Нажмите на заголовок блока чтобы раскрыть задачи · Отметьте выполненные пункты кликом</p>
     </div>
 
-    <!-- УТРО: убран первый пункт про фотофиксацию -->
+    <!-- УТРО -->
     <div class="task-group" data-group="morning">
       <div class="group-header">
         <div class="group-title-row">
@@ -314,7 +314,7 @@
       </div></div>
     </div>
 
-    <!-- ПОДГОТОВКА: добавлен пункт "проверка рации" в конце -->
+    <!-- ПОДГОТОВКА -->
     <div class="task-group" data-group="prep">
       <div class="group-header">
         <div class="group-title-row">
@@ -382,7 +382,7 @@
       </div>
     </div>
 
-    <!-- ИЗМЕНЕНИЯ ПО МЕТКАМ: placeholder через запятую + пробел -->
+    <!-- ИЗМЕНЕНИЯ ПО МЕТКАМ -->
     <div class="task-group" data-group="tag-events-block">
       <div class="group-header">
         <div class="group-title-row">
@@ -421,7 +421,7 @@
       </div></div>
     </div>
 
-    <!-- ВЕЧЕР: "Сбор нарушений" -> "Отчет о нарушениях" -->
+    <!-- ВЕЧЕР -->
     <div class="task-group" data-group="evening">
       <div class="group-header">
         <div class="group-title-row">
@@ -538,7 +538,6 @@
       saveState();
     }
 
-    // Форматирование номеров меток: через запятую + пробел
     function formatTagNumbers(raw) {
       if (!raw) return '';
       return raw.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean).join(', ');
@@ -694,9 +693,8 @@
       loadLine(lineKey); updateReportSection(); saveState();
     }
 
-    // Отчёт: теги в начале + форматирование меток через запятую + пробел
     function exportReport() {
-      const name = document.getElementById('workerName').value || 'Инженер';
+      const name = document.getElementById('workerName').value || 'Команда';
       const date = document.getElementById('workDate').value || new Date().toLocaleDateString('ru-RU');
       const info = labelCounts[currentLine];
       const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : currentLine === "night" ? "Ночь" : `Линия ${currentLine}`;
