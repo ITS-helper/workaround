@@ -385,6 +385,17 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
       50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
     }
+    .map-layer-toggle {
+      display: flex; gap: 6px; margin-bottom: 10px;
+    }
+    .map-layer-btn {
+      font-family: 'Oswald', sans-serif; font-size: 0.78em; letter-spacing: 0.06em;
+      text-transform: uppercase; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: #f8fafc; color: var(--muted);
+      cursor: pointer; transition: all 0.18s ease;
+    }
+    .map-layer-btn:hover { background: #f0f6ff; border-color: var(--accent); color: var(--primary); }
+    .map-layer-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(11,39,64,0.3); }
     @media (max-width: 500px) {
       h1 { font-size: 1.4em; }
       #bleMap { height: 320px; }
@@ -510,6 +521,10 @@
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
             <button class="map-search-clear" id="mapSearchClear" title="Очистить">✕</button>
+          </div>
+          <div id="mapLayerToggle" class="map-layer-toggle" style="display:none">
+            <button class="map-layer-btn" id="btnSatellite" data-layer="satellite">🛰 Спутник</button>
+            <button class="map-layer-btn active" id="btnStreet" data-layer="street">🗺 Схема</button>
           </div>
           <div id="bleMap"><div class="map-placeholder" id="mapPlaceholder">Раскройте блок для загрузки карты…</div></div>
         </div>
@@ -874,9 +889,25 @@
       const placeholder = document.getElementById('mapPlaceholder');
       if (placeholder) placeholder.remove();
       bleMap = L.map('bleMap', { attributionControl: false, zoomControl: true }).setView(center, zoom);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Esri'
-}).addTo(bleMap);
+
+      const tileLayers = {
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' }),
+        street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+      };
+      tileLayers.street.addTo(bleMap);
+      let currentTileLayer = 'street';
+
+      document.querySelectorAll('.map-layer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const layer = btn.dataset.layer;
+          if (layer === currentTileLayer) return;
+          bleMap.removeLayer(tileLayers[currentTileLayer]);
+          tileLayers[layer].addTo(bleMap);
+          currentTileLayer = layer;
+          document.querySelectorAll('.map-layer-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
+        });
+      });
+
       setTimeout(() => bleMap.invalidateSize(), 200);
     }
 
@@ -990,13 +1021,7 @@
             mapData.zones.forEach(z => {
               const pts = pointsByZone[z.id];
               if (pts && pts.length > 2) {
-                L.polygon(pts, {
-  color: z.color || '#00b0ff',
-  opacity: 0.9,
-  fillOpacity: 0.15,
-  weight: 2.5,
-  dashArray: '6, 4'
-})
+                L.polygon(pts, { color: z.color || '#0000ff', opacity: 0.35, fillOpacity: 0.15, weight: 1.5 })
                   .bindTooltip(z.name || '', { permanent: false, className: 'zone-label' }).addTo(bleMap);
               }
             });
@@ -1009,6 +1034,7 @@
           bleMap.fitBounds(bounds, { padding: [30, 30] });
         }
 
+        document.getElementById('mapLayerToggle').style.display = 'flex';
         document.getElementById('mapFiltersBlock').style.display = 'flex';
         document.getElementById('mapStatsBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
