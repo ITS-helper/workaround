@@ -289,7 +289,8 @@
     .map-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
     .map-section.open .map-body { max-height: 4000px; }
     .map-inner { padding: 0 16px 16px; }
-    .map-auth-bar {
+    292 display: none !important;
+    
       display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;
     }
     .map-auth-bar input {
@@ -1099,7 +1100,15 @@
       document.getElementById('workerName').addEventListener('input', saveState);
       document.getElementById('tableSearch').addEventListener('input', () => renderLine(currentLine));
 
-      if (mapSection.classList.contains('open') && getBleToken()) {
+      1103
+          
+  // Авто-открытие и загрузка BLE карты
+  mapSection.classList.add('open');
+  setTimeout(() => {
+    if (bleMap) bleMap.invalidateSize();
+    loadBleMap();
+  }, 500);
+        && getBleToken()) {
         loadBleMap();
       }
     });
