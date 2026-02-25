@@ -488,11 +488,6 @@
       </div>
       <div class="map-body">
         <div class="map-inner">
-          <div id="mapAuthBlock" class="map-auth-bar">
-            <input type="text" id="mapLogin" placeholder="Логин">
-            <input type="password" id="mapPassword" placeholder="Пароль">
-            <button class="map-auth-btn" id="mapLoginBtn">Войти</button>
-          </div>
           <div id="mapMsg" class="map-msg" style="display:none"></div>
           <div id="mapFiltersBlock" class="map-filters" style="display:none">
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
@@ -959,6 +954,16 @@
     async function loadBleMap() {
       try {
         let center = [53.038, 39.011];
+            // Автоматическая авторизация
+    if (!getBleToken()) {
+      try {
+        await bleLogin('impl_dept', 'impl_dept_vsm_2024');
+      } catch (e) {
+        showMapMsg('Ошибка автологина: ' + e.message, 'error');
+        return;
+      }
+    }
+
         let zoom = 15;
         try {
           const cfg = await bleApiFetch('/api/v1/map/config');
@@ -1011,7 +1016,6 @@
           bleMap.fitBounds(bounds, { padding: [30, 30] });
         }
 
-        document.getElementById('mapAuthBlock').style.display = 'none';
         document.getElementById('mapFiltersBlock').style.display = 'flex';
         document.getElementById('mapStatsBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
@@ -1020,7 +1024,6 @@
 
       } catch (e) {
         if (e.message === 'no_token' || e.message === 'unauthorized') {
-          document.getElementById('mapAuthBlock').style.display = 'flex';
           showMapMsg('Требуется авторизация для загрузки карты', '');
         } else {
           showMapMsg('Ошибка загрузки: ' + e.message, 'error');
@@ -1028,21 +1031,6 @@
       }
     }
 
-    document.getElementById('mapLoginBtn').addEventListener('click', async () => {
-      const login = document.getElementById('mapLogin').value.trim();
-      const pw = document.getElementById('mapPassword').value.trim();
-      if (!login || !pw) { showMapMsg('Введите логин и пароль', 'error'); return; }
-      const btn = document.getElementById('mapLoginBtn');
-      btn.disabled = true; btn.textContent = '⌛';
-      try {
-        await bleLogin(login, pw);
-        showMapMsg('Авторизация успешна, загрузка карты...', 'ok');
-        await loadBleMap();
-      } catch (e) {
-        showMapMsg('Ошибка авторизации. Проверьте логин и пароль.', 'error');
-      }
-      btn.disabled = false; btn.textContent = 'Войти';
-    });
 
     document.querySelectorAll('.map-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
