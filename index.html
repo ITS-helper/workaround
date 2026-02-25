@@ -497,7 +497,7 @@
       <div class="map-body">
         <div class="map-inner">
           <!-- Auth -->
-          <div id="mapAuthBlock" class="map-auth-bar" style="display:none">
+          <div id="mapAuthBlock" class="map-auth-bar">
             <input type="text" id="mapLogin" placeholder="Логин">
             <input type="password" id="mapPassword" placeholder="Пароль">
             <button class="map-auth-btn" id="mapLoginBtn">Войти</button>
@@ -832,8 +832,6 @@
     // =============================================
     const BLE_API_BASE = 'https://front-api.vsm.workwatch.pro';
     const BLE_TOKEN_KEY = 'accessToken';
-    const BLE_AUTO_LOGIN = 'impl_dept';
-    const BLE_AUTO_PASS  = 'impl_dept_vsm_2024';
     let bleMap = null;
     let bleMapMarkers = [];
     let bleMapData = [];
@@ -1093,12 +1091,9 @@
       const wasOpen = mapSection.classList.contains('open');
       mapSection.classList.toggle('open');
       if (!wasOpen && !bleMapInitialized) {
-        (async () => {
-          if (!getBleToken()) {
-            try { await bleLogin(BLE_AUTO_LOGIN, BLE_AUTO_PASS); } catch(e) {}
-          }
-          if (getBleToken()) loadBleMap();
-        })();
+        if (getBleToken()) {
+          loadBleMap();
+        }
       }
       if (!wasOpen && bleMap) {
         setTimeout(() => bleMap.invalidateSize(), 300);
@@ -1146,19 +1141,10 @@
       document.getElementById('workerName').addEventListener('input', saveState);
       document.getElementById('tableSearch').addEventListener('input', () => renderLine(currentLine));
 
-      // Auto-auth and load map on startup
-      (async () => {
-        if (!getBleToken()) {
-          try {
-            await bleLogin(BLE_AUTO_LOGIN, BLE_AUTO_PASS);
-          } catch (e) {
-            console.warn('BLE auto-login failed:', e);
-          }
-        }
-        if (mapSection.classList.contains('open') && getBleToken()) {
-          loadBleMap();
-        }
-      })();
+      // Auto-load map if token exists and section is open
+      if (mapSection.classList.contains('open') && getBleToken()) {
+        loadBleMap();
+      }
     });
 
     window.addEventListener('beforeunload', saveState);
