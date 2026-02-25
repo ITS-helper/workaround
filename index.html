@@ -345,14 +345,25 @@
       color: var(--muted); font-size: 14px; text-align: center; padding: 20px;
     }
     .map-search-bar {
-      display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+      display: flex; gap: 8px; margin-bottom: 10px; align-items: center; position: relative;
     }
     .map-search-bar input {
-      flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 13px; font-family: 'Source Sans 3', sans-serif; background: #f8fafc; color: #1a2a3a;
+      flex: 1; padding: 10px 36px 10px 14px; border: 2px solid var(--accent); border-radius: 10px;
+      font-size: 16px; font-family: 'Source Sans 3', sans-serif; background: #fff; color: #1a2a3a;
+      box-shadow: 0 2px 8px rgba(0,176,255,0.15);
     }
-    .map-search-bar input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .map-search-bar input:focus { outline: none; border-color: var(--primary); background: #fff; }
     .map-search-bar input::placeholder { color: #a0b0c0; }
+    .map-search-clear {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 18px; line-height: 1; padding: 4px; display: none;
+    }
+    .map-search-clear:hover { color: var(--danger); }
+    @media (max-width: 600px) {
+      #bleMap { height: calc(100vh - 180px); border-radius: 8px; }
+      .map-search-bar input { font-size: 16px; }
+    }
     .map-msg {
       text-align: center; padding: 14px; font-size: 13px; color: var(--muted);
       border: 1px dashed var(--border); border-radius: 8px; margin-bottom: 12px;
@@ -497,7 +508,8 @@
             <div class="map-stat"><span class="dot dot-inspection"></span> Не обойдена: <span id="msInsp">0</span></div>
           </div>
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
-            <input type="text" id="mapBleSearch" placeholder="Поиск по № метки...">
+            <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
+            <button class="map-search-clear" id="mapSearchClear" title="Очистить">✕</button>
           </div>
           <div id="bleMap"><div class="map-placeholder" id="mapPlaceholder">Раскройте блок для загрузки карты…</div></div>
         </div>
@@ -862,9 +874,7 @@
       const placeholder = document.getElementById('mapPlaceholder');
       if (placeholder) placeholder.remove();
       bleMap = L.map('bleMap', { attributionControl: false, zoomControl: true }).setView(center, zoom);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Esri'
-}).addTo(bleMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bleMap);
       setTimeout(() => bleMap.invalidateSize(), 200);
     }
 
@@ -1011,9 +1021,14 @@
       });
     });
 
-    document.getElementById('mapBleSearch')?.addEventListener('input', () => {
+    const mapBleSearchEl = document.getElementById('mapBleSearch');
+    const mapSearchClearEl = document.getElementById('mapSearchClear');
+
+    mapBleSearchEl?.addEventListener('input', () => {
+      const raw = mapBleSearchEl.value;
+      mapSearchClearEl.style.display = raw ? 'block' : 'none';
       renderBleMarkers();
-      const q = document.getElementById('mapBleSearch').value.trim().toLowerCase().replace(/^ble/i, '');
+      const q = raw.trim().toLowerCase().replace(/^ble/i, '');
       if (!q) return;
       const found = bleMapData.find(p => p.ble.toLowerCase() === q);
       if (found && found.lat && found.lng) {
@@ -1024,6 +1039,13 @@
         });
         if (marker) marker.openPopup();
       }
+    });
+
+    mapSearchClearEl?.addEventListener('click', () => {
+      mapBleSearchEl.value = '';
+      mapSearchClearEl.style.display = 'none';
+      renderBleMarkers();
+      mapBleSearchEl.focus();
     });
 
     const mapSection = document.querySelector('[data-map-section="ble"]');
