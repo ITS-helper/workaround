@@ -289,7 +289,6 @@
     .map-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
     .map-section.open .map-body { max-height: 4000px; }
     .map-inner { padding: 0 16px 16px; }
-
     .map-auth-bar {
       display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;
     }
@@ -307,7 +306,6 @@
     }
     .map-auth-btn:hover { background: #19b9ff; }
     .map-auth-btn:disabled { opacity: 0.5; cursor: default; }
-
     .map-filters {
       display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
     }
@@ -327,7 +325,6 @@
       font-size: 0.9em; background: rgba(255,255,255,0.25); border-radius: 999px;
       padding: 0 6px; min-width: 18px; text-align: center;
     }
-
     .map-stats {
       display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
     }
@@ -340,7 +337,6 @@
     .dot-ok { background: var(--success); }
     .dot-battery { background: var(--danger); }
     .dot-inspection { background: var(--warning); }
-
     #bleMap {
       width: 100%; height: 420px; border-radius: 10px; border: 1px solid var(--border);
       background: #e8ecf2; position: relative; z-index: 1;
@@ -358,15 +354,12 @@
     }
     .map-search-bar input:focus { outline: none; border-color: var(--accent); background: #fff; }
     .map-search-bar input::placeholder { color: #a0b0c0; }
-
     .map-msg {
       text-align: center; padding: 14px; font-size: 13px; color: var(--muted);
       border: 1px dashed var(--border); border-radius: 8px; margin-bottom: 12px;
     }
     .map-msg.error { color: var(--danger); border-color: rgba(239,68,68,0.3); background: #fef2f2; }
     .map-msg.ok { color: var(--success); border-color: rgba(16,185,129,0.3); background: #f0fdf8; }
-
-    /* Leaflet marker styles */
     .ble-dot {
       width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; font-size: 9px; font-weight: 700; color: #fff;
@@ -382,7 +375,6 @@
       0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
       50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
     }
-
     @media (max-width: 500px) {
       h1 { font-size: 1.4em; }
       #bleMap { height: 320px; }
@@ -496,14 +488,12 @@
       </div>
       <div class="map-body">
         <div class="map-inner">
-          <!-- Auth -->
           <div id="mapAuthBlock" class="map-auth-bar">
             <input type="text" id="mapLogin" placeholder="Логин">
             <input type="password" id="mapPassword" placeholder="Пароль">
             <button class="map-auth-btn" id="mapLoginBtn">Войти</button>
           </div>
           <div id="mapMsg" class="map-msg" style="display:none"></div>
-          <!-- Filters -->
           <div id="mapFiltersBlock" class="map-filters" style="display:none">
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
@@ -515,11 +505,9 @@
             <div class="map-stat"><span class="dot dot-battery"></span> Заряд ≤15%: <span id="msBat">0</span></div>
             <div class="map-stat"><span class="dot dot-inspection"></span> Не обойдена: <span id="msInsp">0</span></div>
           </div>
-          <!-- Search -->
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Поиск по № метки...">
           </div>
-          <!-- Map -->
           <div id="bleMap"><div class="map-placeholder" id="mapPlaceholder">Авторизуйтесь для загрузки карты</div></div>
         </div>
       </div>
@@ -596,7 +584,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // =============================================
-    //  ОРИГИНАЛЬНАЯ ЛОГИКА ЧЕК-ЛИСТА (без изменений)
+    //  ОРИГИНАЛЬНАЯ ЛОГИКА ЧЕК-ЛИСТА
     // =============================================
     const SHEET_ID = "1CU56AZdWC9dCvkf_z6CWMtrgfuWRCG3HYx7hp79vI_c";
     const SHEET_NAME = "Для печати🖨️";
@@ -705,7 +693,7 @@
     function norm(s) { return String(s ?? "").toLowerCase().replace(/\s/g, ""); }
     function cellText(v) { return (v === null || v === undefined) ? "" : String(v); }
     function isIntLike(s) { return /^[0-9]+$/.test(String(s).trim()); }
-    function esc(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
+    function esc(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
     function updateBadges() {
       ["1","2","kns","night"].forEach(k => {
@@ -828,9 +816,9 @@
     }
 
     // =============================================
-    //  КАРТА BLE-МЕТОК
+    //  КАРТА BLE-МЕТОК — через прокси Apps Script
     // =============================================
-    const BLE_API_BASE = 'https://front-api.vsm.workwatch.pro';
+    const BLE_PROXY_URL = 'https://script.google.com/macros/s/AKfycbycLi4DizGGLOf3vOzb4oudIMi0NoePI0j2Z0bN1jMQlc6MgbI0bjM-Hg6Hqn4yABmDOA/exec';
     const BLE_TOKEN_KEY = 'accessToken';
     let bleMap = null;
     let bleMapMarkers = [];
@@ -848,63 +836,60 @@
     }
     function hideMapMsg() { document.getElementById('mapMsg').style.display = 'none'; }
 
-    async function bleApiFetch(path) {
-      const token = getBleToken();
-      if (!token) throw new Error('no_token');
-      const res = await fetch(BLE_API_BASE + path, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+    async function bleProxyFetch(action, params = {}) {
+      const res = await fetch(BLE_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...params })
       });
-      if (res.status === 401) { localStorage.removeItem(BLE_TOKEN_KEY); throw new Error('unauthorized'); }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
     }
 
     async function bleLogin(username, password) {
-      const res = await fetch(BLE_API_BASE + '/api/v1/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-      });
-      if (!res.ok) throw new Error('auth_failed');
-      const data = await res.json();
+      const data = await bleProxyFetch('login', { username, password });
       const token = data.accessToken || data.access_token || data.token;
       if (!token) throw new Error('no_token_in_response');
       localStorage.setItem(BLE_TOKEN_KEY, token);
       return token;
     }
 
+    async function bleApiFetch(path) {
+      const token = getBleToken();
+      if (!token) throw new Error('no_token');
+      const data = await bleProxyFetch('tags', { endpoint: path.replace(/^\/api\/v1\//, ''), token });
+      if (data.detail === 'Could not validate credentials') {
+        localStorage.removeItem(BLE_TOKEN_KEY);
+        throw new Error('unauthorized');
+      }
+      return data;
+    }
+
     function initBleMap(center, zoom) {
       if (bleMap) return;
       const placeholder = document.getElementById('mapPlaceholder');
       if (placeholder) placeholder.remove();
-
       bleMap = L.map('bleMap', { attributionControl: false, zoomControl: true }).setView(center, zoom);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bleMap);
-
-      // Fix tile loading after reveal
       setTimeout(() => bleMap.invalidateSize(), 200);
     }
 
     function classifyBle(point) {
       const LOW = 15;
-      const inspectionDays = 1;
       const now = new Date();
       const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-
       let isInspected = false;
       let recordDt = 'Не обходилась';
       if (point.record_dt) {
         const d = new Date(point.record_dt);
         const inspDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-        isInspected = (today - inspDate) / 86400000 <= inspectionDays;
+        isInspected = (today - inspDate) / 86400000 <= 1;
         recordDt = inspDate.toISOString().slice(0, 10);
       }
-
       const isLowBattery = point.charge_value != null && point.charge_value <= LOW;
       let status = 'ok';
       if (isLowBattery) status = 'battery';
       else if (!isInspected) status = 'inspection';
-
       return {
         id: point.id,
         ble: String(point.ble_number || ''),
@@ -935,14 +920,11 @@
     function renderBleMarkers() {
       bleMapMarkers.forEach(m => bleMap.removeLayer(m));
       bleMapMarkers = [];
-
       const q = (document.getElementById('mapBleSearch').value || '').trim().toLowerCase();
-
       bleMapData.forEach(pt => {
         if (!pt.lat || !pt.lng) return;
         if (bleMapFilter !== 'all' && pt.status !== bleMapFilter) return;
         if (q && !pt.ble.toLowerCase().includes(q)) return;
-
         const marker = L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
           .bindPopup(`
             <div style="font-size:13px;line-height:1.4">
@@ -956,7 +938,6 @@
             </div>
           `, { maxWidth: 280 })
           .addTo(bleMap);
-
         bleMapMarkers.push(marker);
       });
     }
@@ -966,7 +947,6 @@
       const ok = bleMapData.filter(p => p.status === 'ok').length;
       const bat = bleMapData.filter(p => p.status === 'battery').length;
       const insp = bleMapData.filter(p => p.status === 'inspection').length;
-
       document.getElementById('fcAll').textContent = all;
       document.getElementById('fcOk').textContent = ok;
       document.getElementById('fcBat').textContent = bat;
@@ -978,7 +958,6 @@
 
     async function loadBleMap() {
       try {
-        // 1) get config
         let center = [53.038, 39.011];
         let zoom = 15;
         try {
@@ -989,13 +968,11 @@
 
         initBleMap(center, zoom);
 
-        // 2) get user data for companyId
         let companyId;
         try {
           const ud = await bleApiFetch('/api/v1/user/me/');
           companyId = ud.companyId || ud.company_id;
         } catch {
-          // fallback: try from /api/v1/user/data
           try {
             const ud2 = await bleApiFetch('/api/v1/user/data');
             companyId = ud2.companyId || ud2.company_id;
@@ -1003,14 +980,12 @@
         }
         if (!companyId) { showMapMsg('Не удалось определить companyId', 'error'); return; }
 
-        // 3) load BLE markers
         const rawBle = await bleApiFetch(`/api/v1/map/ble/${companyId}`);
         bleMapData = rawBle.map(classifyBle);
 
         updateMapStats();
         renderBleMarkers();
 
-        // 4) load zones
         try {
           const mapData = await bleApiFetch(`/api/v1/map/${companyId}/map_data`);
           if (mapData.zones && mapData.points) {
@@ -1030,7 +1005,6 @@
           }
         } catch {}
 
-        // fit bounds
         const validPts = bleMapData.filter(p => p.lat && p.lng);
         if (validPts.length > 1) {
           const bounds = L.latLngBounds(validPts.map(p => [p.lat, p.lng]));
@@ -1054,7 +1028,6 @@
       }
     }
 
-    // Map event handlers
     document.getElementById('mapLoginBtn').addEventListener('click', async () => {
       const login = document.getElementById('mapLogin').value.trim();
       const pw = document.getElementById('mapPassword').value.trim();
@@ -1084,16 +1057,13 @@
       renderBleMarkers();
     });
 
-    // Map section toggle
     const mapSection = document.querySelector('[data-map-section="ble"]');
     const mapSectionHeader = mapSection.querySelector('.map-section-header');
     mapSectionHeader.addEventListener('click', () => {
       const wasOpen = mapSection.classList.contains('open');
       mapSection.classList.toggle('open');
       if (!wasOpen && !bleMapInitialized) {
-        if (getBleToken()) {
-          loadBleMap();
-        }
+        if (getBleToken()) { loadBleMap(); }
       }
       if (!wasOpen && bleMap) {
         setTimeout(() => bleMap.invalidateSize(), 300);
@@ -1141,7 +1111,6 @@
       document.getElementById('workerName').addEventListener('input', saveState);
       document.getElementById('tableSearch').addEventListener('input', () => renderLine(currentLine));
 
-      // Auto-load map if token exists and section is open
       if (mapSection.classList.contains('open') && getBleToken()) {
         loadBleMap();
       }
