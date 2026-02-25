@@ -862,7 +862,9 @@
       const placeholder = document.getElementById('mapPlaceholder');
       if (placeholder) placeholder.remove();
       bleMap = L.map('bleMap', { attributionControl: false, zoomControl: true }).setView(center, zoom);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bleMap);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Esri'
+}).addTo(bleMap);
       setTimeout(() => bleMap.invalidateSize(), 200);
     }
 
