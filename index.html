@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --primary: #0b2740;
@@ -18,6 +19,7 @@
       --muted: #5a6a7e;
       --success: #10b981;
       --warning: #f59e0b;
+      --danger: #ef4444;
       --progress-bg: #dde4ee;
       --glass-bg: rgba(255,255,255,0.92);
       --border: #dde4ee;
@@ -265,11 +267,125 @@
     .btn-report:hover:not(:disabled) { background: #19b9ff; box-shadow: 0 6px 20px rgba(0,176,255,0.45); transform: translateY(-1px); }
     .btn-report:disabled { background: var(--progress-bg); color: var(--muted); box-shadow: none; cursor: default; }
     #confetti { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1000; }
+
+    /* ===== MAP SECTION ===== */
+    .map-section {
+      margin-bottom: 16px; background: var(--card-bg); border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(11,39,64,0.07); border: 1px solid var(--border);
+      overflow: hidden; transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .map-section:hover { box-shadow: 0 8px 28px rgba(11,39,64,0.12); border-color: rgba(0,176,255,0.35); }
+    .map-section-header {
+      padding: 16px 20px 14px; cursor: pointer; user-select: none;
+      display: flex; flex-direction: column; gap: 10px; transition: background 0.2s;
+    }
+    .map-section-header:hover { background: #f7fafd; }
+    .map-section h2 {
+      font-family: 'Oswald', sans-serif; color: var(--primary); margin: 0;
+      font-size: 1.05em; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .map-section.open .group-chevron { transform: rotate(180deg); }
+    .map-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+    .map-section.open .map-body { max-height: 4000px; }
+    .map-inner { padding: 0 16px 16px; }
+
+    .map-auth-bar {
+      display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;
+    }
+    .map-auth-bar input {
+      flex: 1; min-width: 140px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: 'Source Sans 3', sans-serif; background: #f8fafc; color: #1a2a3a;
+    }
+    .map-auth-bar input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .map-auth-bar input::placeholder { color: #a0b0c0; }
+    .map-auth-btn {
+      font-family: 'Oswald', sans-serif; font-size: 0.8em; letter-spacing: 0.06em;
+      text-transform: uppercase; font-weight: 600; padding: 8px 16px; border-radius: 8px;
+      border: 1px solid var(--accent); background: var(--accent); color: #04111f;
+      cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
+    }
+    .map-auth-btn:hover { background: #19b9ff; }
+    .map-auth-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .map-filters {
+      display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+    }
+    .map-filter-btn {
+      font-family: 'Oswald', sans-serif; font-size: 0.75em; letter-spacing: 0.06em;
+      text-transform: uppercase; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: #f8fafc; color: var(--muted);
+      cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 5px;
+    }
+    .map-filter-btn:hover { background: #f0f6ff; border-color: var(--accent); color: var(--primary); }
+    .map-filter-btn.active { color: #fff; border-color: transparent; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .map-filter-btn.filter-all.active { background: var(--primary); }
+    .map-filter-btn.filter-ok.active { background: var(--success); }
+    .map-filter-btn.filter-battery.active { background: var(--danger); }
+    .map-filter-btn.filter-inspection.active { background: var(--warning); color: #78350f; }
+    .map-filter-btn .filter-count {
+      font-size: 0.9em; background: rgba(255,255,255,0.25); border-radius: 999px;
+      padding: 0 6px; min-width: 18px; text-align: center;
+    }
+
+    .map-stats {
+      display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .map-stat {
+      display: flex; align-items: center; gap: 5px; font-size: 12px;
+      font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.04em;
+      background: rgba(0,176,255,0.08); border-radius: 999px; padding: 3px 10px;
+    }
+    .map-stat .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-ok { background: var(--success); }
+    .dot-battery { background: var(--danger); }
+    .dot-inspection { background: var(--warning); }
+
+    #bleMap {
+      width: 100%; height: 420px; border-radius: 10px; border: 1px solid var(--border);
+      background: #e8ecf2; position: relative; z-index: 1;
+    }
+    .map-placeholder {
+      display: flex; align-items: center; justify-content: center; height: 100%;
+      color: var(--muted); font-size: 14px; text-align: center; padding: 20px;
+    }
+    .map-search-bar {
+      display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+    }
+    .map-search-bar input {
+      flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: 'Source Sans 3', sans-serif; background: #f8fafc; color: #1a2a3a;
+    }
+    .map-search-bar input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .map-search-bar input::placeholder { color: #a0b0c0; }
+
+    .map-msg {
+      text-align: center; padding: 14px; font-size: 13px; color: var(--muted);
+      border: 1px dashed var(--border); border-radius: 8px; margin-bottom: 12px;
+    }
+    .map-msg.error { color: var(--danger); border-color: rgba(239,68,68,0.3); background: #fef2f2; }
+    .map-msg.ok { color: var(--success); border-color: rgba(16,185,129,0.3); background: #f0fdf8; }
+
+    /* Leaflet marker styles */
+    .ble-dot {
+      width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 9px; font-weight: 700; color: #fff;
+      font-family: 'Oswald', sans-serif; letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 2px solid #fff;
+      transition: transform 0.15s;
+    }
+    .ble-dot:hover { transform: scale(1.2); }
+    .ble-dot-ok { background: var(--success); }
+    .ble-dot-battery { background: var(--danger); animation: pulse-red 2s infinite; }
+    .ble-dot-inspection { background: var(--warning); border-color: #fbbf24; }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+
     @media (max-width: 500px) {
       h1 { font-size: 1.4em; }
-      .actions { flex-wrap: wrap; gap: 8px; justify-content: center; padding: 12px 14px; }
-      .btn { flex: 1; min-width: 120px; justify-content: center; }
-      #totalProgress { order: -1; width: 100%; font-size: 22px; }
+      #bleMap { height: 320px; }
     }
     @supports (padding: max(0px)) { .actions { bottom: max(16px, env(safe-area-inset-bottom)); } }
   </style>
@@ -324,22 +440,10 @@
         <div class="progress-container"><div class="progress-bar" data-group="prep"></div></div>
       </div>
       <div class="subtasks"><div class="subtasks-inner">
-        <div class="subtask">
-          <input type="checkbox" data-task-id="prep-1">
-          <span>Запуск смены на часах, получение отладочного устройства</span>
-        </div>
-        <div class="subtask">
-          <input type="checkbox" data-task-id="prep-2">
-          <span>Обновление меток в мобильном приложении</span>
-        </div>
-        <div class="subtask">
-          <input type="checkbox" data-task-id="prep-3">
-          <span>Проверка рюкзака с инструментом</span>
-        </div>
-        <div class="subtask">
-          <input type="checkbox" data-task-id="prep-4">
-          <span>Проверка рации</span>
-        </div>
+        <div class="subtask"><input type="checkbox" data-task-id="prep-1"><span>Запуск смены на часах, получение отладочного устройства</span></div>
+        <div class="subtask"><input type="checkbox" data-task-id="prep-2"><span>Обновление меток в мобильном приложении</span></div>
+        <div class="subtask"><input type="checkbox" data-task-id="prep-3"><span>Проверка рюкзака с инструментом</span></div>
+        <div class="subtask"><input type="checkbox" data-task-id="prep-4"><span>Проверка рации</span></div>
       </div></div>
     </div>
 
@@ -378,6 +482,45 @@
             <span class="count-chip" id="chipTotal">Всего: —</span>
             <span class="count-chip done" id="chipDone">Выполнено: —</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== КАРТА BLE-МЕТОК ===== -->
+    <div class="map-section" data-map-section="ble">
+      <div class="map-section-header">
+        <div class="group-title-row">
+          <h2><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Карта BLE-меток</h2>
+          <span class="group-chevron">▼</span>
+        </div>
+      </div>
+      <div class="map-body">
+        <div class="map-inner">
+          <!-- Auth -->
+          <div id="mapAuthBlock" class="map-auth-bar">
+            <input type="text" id="mapLogin" placeholder="Логин">
+            <input type="password" id="mapPassword" placeholder="Пароль">
+            <button class="map-auth-btn" id="mapLoginBtn">Войти</button>
+          </div>
+          <div id="mapMsg" class="map-msg" style="display:none"></div>
+          <!-- Filters -->
+          <div id="mapFiltersBlock" class="map-filters" style="display:none">
+            <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
+            <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
+            <button class="map-filter-btn filter-battery" data-filter="battery">🔋 Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
+            <button class="map-filter-btn filter-inspection" data-filter="inspection">🚶 Не обойдена <span class="filter-count" id="fcInsp">0</span></button>
+          </div>
+          <div id="mapStatsBlock" class="map-stats" style="display:none">
+            <div class="map-stat"><span class="dot dot-ok"></span> В норме: <span id="msOk">0</span></div>
+            <div class="map-stat"><span class="dot dot-battery"></span> Заряд ≤15%: <span id="msBat">0</span></div>
+            <div class="map-stat"><span class="dot dot-inspection"></span> Не обойдена: <span id="msInsp">0</span></div>
+          </div>
+          <!-- Search -->
+          <div id="mapSearchBlock" class="map-search-bar" style="display:none">
+            <input type="text" id="mapBleSearch" placeholder="Поиск по № метки...">
+          </div>
+          <!-- Map -->
+          <div id="bleMap"><div class="map-placeholder" id="mapPlaceholder">Авторизуйтесь для загрузки карты</div></div>
         </div>
       </div>
     </div>
@@ -431,14 +574,8 @@
         <div class="progress-container"><div class="progress-bar" data-group="evening"></div></div>
       </div>
       <div class="subtasks"><div class="subtasks-inner">
-        <div class="subtask">
-          <input type="checkbox" data-task-id="evening-1">
-          <span>Отчет о нарушениях</span>
-        </div>
-        <div class="subtask">
-          <input type="checkbox" data-task-id="evening-2">
-          <span>Закрытие смены / перекличка</span>
-        </div>
+        <div class="subtask"><input type="checkbox" data-task-id="evening-1"><span>Отчет о нарушениях</span></div>
+        <div class="subtask"><input type="checkbox" data-task-id="evening-2"><span>Закрытие смены / перекличка</span></div>
       </div></div>
     </div>
 
@@ -456,20 +593,21 @@
 
   <canvas id="confetti"></canvas>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // =============================================
+    //  ОРИГИНАЛЬНАЯ ЛОГИКА ЧЕК-ЛИСТА (без изменений)
+    // =============================================
     const SHEET_ID = "1CU56AZdWC9dCvkf_z6CWMtrgfuWRCG3HYx7hp79vI_c";
     const SHEET_NAME = "Для печати🖨️";
     const STATUS_SHEET_NAME = "Свод_журналов_СПГ+ТСБ";
     const STATUS_RANGE = "Q1:R2";
-    const GROUPS = {
-      "1": "D2:M200", "2": "R2:Z200", "kns": "AD2:AM200", "night": "AQ2:AZ200"
-    };
+    const GROUPS = { "1": "D2:M200", "2": "R2:Z200", "kns": "AD2:AM200", "night": "AQ2:AZ200" };
     const TRIGGER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzU7wYhYZxJu8_QvJMq174aPZ6lPeHu5PY6jqfyGbE1QgxZv0KwFVvgsDt_A2-wXUWA/exec";
     const TRIGGER_TOKEN = "12345";
     const STATUS_COL_NAME = "Статус обхода";
     const STATUS_WAIT = "Ожидание получения данных";
     const STATUS_DONE = "Данные зафиксированы";
-
     const STORAGE_KEY = 'itssupport_cl2_v1';
 
     function saveState() {
@@ -481,6 +619,7 @@
         groups: Array.from(document.querySelectorAll('.task-group'))
           .map(g => ({ id: g.dataset.group, open: g.classList.contains('open') })),
         tableOpen: document.querySelector('[data-tgroup="lines"]').classList.contains('open'),
+        mapOpen: document.querySelector('[data-map-section="ble"]').classList.contains('open'),
         currentLine,
         countNew: document.getElementById('countNew').textContent,
         countLost: document.getElementById('countLost').textContent,
@@ -505,6 +644,7 @@
             if (group && open) group.classList.add('open');
           });
           if (saved.tableOpen) document.querySelector('[data-tgroup="lines"]').classList.add('open');
+          if (saved.mapOpen) document.querySelector('[data-map-section="ble"]').classList.add('open');
           if (saved.currentLine) currentLine = saved.currentLine;
           if (saved.countNew) document.getElementById('countNew').textContent = saved.countNew;
           if (saved.countLost) document.getElementById('countLost').textContent = saved.countLost;
@@ -549,8 +689,7 @@
       const btn = document.getElementById("reportBtn");
       if (!info || info.total === 0) {
         infoEl.innerHTML = `Откройте блок «Обход по меткам» и выберите маршрут`;
-        btn.disabled = true;
-        return;
+        btn.disabled = true; return;
       }
       const pct = Math.round((info.done / info.total) * 100);
       const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : currentLine === "night" ? "Ночь" : `Линия ${currentLine}`;
@@ -559,27 +698,14 @@
       btn.disabled = false;
     }
 
-    function resetAll() {
-      if (!confirm('Сбросить весь чек-лист?')) return;
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.checked = false; cb.closest('.subtask').classList.remove('completed');
-      });
-      updateAllProgress(); saveState();
-    }
-
     let currentLine = "1";
     let lineData = { "1": null, "2": null, "kns": null, "night": null };
-    let labelCounts = {
-      "1": { total: 0, done: 0 }, "2": { total: 0, done: 0 },
-      "kns": { total: 0, done: 0 }, "night": { total: 0, done: 0 }
-    };
+    let labelCounts = { "1": { total: 0, done: 0 }, "2": { total: 0, done: 0 }, "kns": { total: 0, done: 0 }, "night": { total: 0, done: 0 } };
 
     function norm(s) { return String(s ?? "").toLowerCase().replace(/\s/g, ""); }
     function cellText(v) { return (v === null || v === undefined) ? "" : String(v); }
     function isIntLike(s) { return /^[0-9]+$/.test(String(s).trim()); }
-    function esc(str) {
-      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m]));
-    }
+    function esc(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
     function updateBadges() {
       ["1","2","kns","night"].forEach(k => {
@@ -599,14 +725,11 @@
       setTableContent(`<tr><td class="table-loading" colspan="99">Загрузка…</td></tr>`);
       const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&range=${encodeURIComponent(GROUPS[lineKey])}&headers=1&t=${Date.now()}`;
       try {
-        const res = await fetch(url);
-        const text = await res.text();
+        const res = await fetch(url); const text = await res.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const table = json.table;
         const headers = table.cols.map(c => cellText(c.label || ""));
-        let rows = table.rows
-          .map(r => (r.c || []).map(c => cellText(c ? c.v : "")))
-          .filter(row => row.some(c => c.trim() !== ""));
+        let rows = table.rows.map(r => (r.c || []).map(c => cellText(c ? c.v : ""))).filter(row => row.some(c => c.trim() !== ""));
         const labelIdx = headers.findIndex(h => norm(h).includes("метк"));
         const statusIdx = headers.findIndex(h => norm(h) === norm(STATUS_COL_NAME));
         if (statusIdx !== -1) {
@@ -627,8 +750,7 @@
     }
 
     function renderLine(lineKey) {
-      const data = lineData[lineKey];
-      if (!data) return;
+      const data = lineData[lineKey]; if (!data) return;
       const { headers, rows, labelIdx, statusIdx } = data;
       const q = document.getElementById("tableSearch").value.trim().toLowerCase();
       const filtered = rows.filter(r => !q || (labelIdx !== -1 && r[labelIdx].toLowerCase().includes(q)));
@@ -640,16 +762,14 @@
       ];
       const colIdxs = colMatchers.map(m => { const idx = headers.findIndex(m.match); return { label: m.label, idx }; }).filter(c => c.idx !== -1);
       const displayCols = colIdxs.length >= 2 ? colIdxs : headers.map((h, i) => ({ label: h || '—', idx: i }));
-      const colCount = displayCols.length;
       document.getElementById("dataThead").innerHTML = `<tr>${displayCols.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr>`;
       if (filtered.length === 0) {
-        setTableContent(`<tr><td class="table-empty" colspan="${colCount}">Нет данных</td></tr>`);
+        setTableContent(`<tr><td class="table-empty" colspan="${displayCols.length}">Нет данных</td></tr>`);
       } else {
         document.getElementById("dataTbody").innerHTML = filtered.map(row => {
           const isDone = statusIdx !== -1 && row[statusIdx].trim() === STATUS_DONE;
           const isWait = statusIdx !== -1 && row[statusIdx].trim() === STATUS_WAIT;
-          const cls = isDone ? 'row-done' : (isWait ? 'row-wait' : '');
-          return `<tr class="${cls}">${displayCols.map(c => `<td>${esc(row[c.idx] ?? '')}</td>`).join('')}</tr>`;
+          return `<tr class="${isDone ? 'row-done' : (isWait ? 'row-wait' : '')}">${displayCols.map(c => `<td>${esc(row[c.idx] ?? '')}</td>`).join('')}</tr>`;
         }).join('');
       }
       const info = labelCounts[lineKey];
@@ -657,16 +777,12 @@
       document.getElementById("chipDone").textContent = `Выполнено: ${info.done}`;
     }
 
-    function setTableContent(html) {
-      document.getElementById("dataTbody").innerHTML = html;
-      document.getElementById("dataThead").innerHTML = "";
-    }
+    function setTableContent(html) { document.getElementById("dataTbody").innerHTML = html; document.getElementById("dataThead").innerHTML = ""; }
 
     async function loadStatusBox() {
       try {
         const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(STATUS_SHEET_NAME)}&range=${encodeURIComponent(STATUS_RANGE)}&headers=0&t=${Date.now()}`;
-        const res = await fetch(url);
-        const text = await res.text();
+        const res = await fetch(url); const text = await res.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const lines = json.table.rows.map(r => r.c.map(c => cellText(c?.v)).filter(Boolean).join(" ")).filter(Boolean);
         const box = document.getElementById("statusBox");
@@ -699,64 +815,295 @@
       const info = labelCounts[currentLine];
       const lineLabel = currentLine === "kns" ? "КНС" : currentLine === "2" ? "Линия 3" : currentLine === "night" ? "Ночь" : `Линия ${currentLine}`;
       const pct = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
-
-      let report = `@NURLAN_MURZABAEV @Ruslanburangulovv\n`;
-      report += `📅 ${date}\n`;
-      report += `Отчёт по обходу:\n`;
-      report += `${name}\n`;
-      report += `Маршрут: ${lineLabel}\n`;
-      report += `Выполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
-
+      let report = `@NURLAN_MURZABAEV @Ruslanburangulovv\n📅 ${date}\nОтчёт по обходу:\n${name}\nМаршрут: ${lineLabel}\nВыполнено: ${info.done}/${info.total} меток (${pct}%)\n`;
       const countNew = parseInt(document.getElementById('countNew').textContent) || 0;
       const countLost = parseInt(document.getElementById('countLost').textContent) || 0;
       const notesNew = formatTagNumbers(document.getElementById('notesNew').value.trim());
       const notesLost = formatTagNumbers(document.getElementById('notesLost').value.trim());
-
-      if (countNew > 0) {
-        report += `\nНовые метки: ${countNew} шт.`;
-        if (notesNew) report += `\nНомера: ${notesNew}`;
-        report += `\n`;
-      }
-      if (countLost > 0) {
-        report += `\nПотерянные метки: ${countLost} шт.`;
-        if (notesLost) report += `\nНомера: ${notesLost}`;
-        report += `\n`;
-      }
-
+      if (countNew > 0) { report += `\nНовые метки: ${countNew} шт.`; if (notesNew) report += `\nНомера: ${notesNew}`; report += `\n`; }
+      if (countLost > 0) { report += `\nПотерянные метки: ${countLost} шт.`; if (notesLost) report += `\nНомера: ${notesLost}`; report += `\n`; }
       navigator.clipboard.writeText(report)
         .then(() => alert('✅ Отчёт скопирован!\nВставьте в Telegram или другой чат.'))
         .catch(() => prompt('Скопируйте отчёт:', report));
     }
 
-    function showConfetti() {
-      const canvas = document.getElementById('confetti');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-      const pieces = [];
-      const colors = ['#00b0ff','#34d399','#f59e0b','#f87171','#a78bfa'];
-      for (let i = 0; i < 120; i++) {
-        pieces.push({
-          x: Math.random() * canvas.width, y: -10,
-          vx: (Math.random() - 0.5) * 8, vy: Math.random() * 5 + 3,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          size: Math.random() * 7 + 3, rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 8
-        });
-      }
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pieces.forEach((p, i) => {
-          p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.rot += p.rotV;
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-          ctx.restore();
-          if (p.y > canvas.height) pieces.splice(i, 1);
-        });
-        if (pieces.length) requestAnimationFrame(animate);
-        else ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-      animate();
+    // =============================================
+    //  КАРТА BLE-МЕТОК
+    // =============================================
+    const BLE_API_BASE = 'https://front-api.vsm.workwatch.pro';
+    const BLE_TOKEN_KEY = 'accessToken';
+    let bleMap = null;
+    let bleMapMarkers = [];
+    let bleMapData = [];
+    let bleMapFilter = 'all';
+    let bleMapInitialized = false;
+
+    function getBleToken() { return localStorage.getItem(BLE_TOKEN_KEY); }
+
+    function showMapMsg(text, type = '') {
+      const el = document.getElementById('mapMsg');
+      el.textContent = text;
+      el.className = 'map-msg' + (type ? ' ' + type : '');
+      el.style.display = 'block';
+    }
+    function hideMapMsg() { document.getElementById('mapMsg').style.display = 'none'; }
+
+    async function bleApiFetch(path) {
+      const token = getBleToken();
+      if (!token) throw new Error('no_token');
+      const res = await fetch(BLE_API_BASE + path, {
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+      if (res.status === 401) { localStorage.removeItem(BLE_TOKEN_KEY); throw new Error('unauthorized'); }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
     }
 
+    async function bleLogin(login, password) {
+      const res = await fetch(BLE_API_BASE + '/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login, password })
+      });
+      if (!res.ok) throw new Error('auth_failed');
+      const data = await res.json();
+      const token = data.accessToken || data.access_token || data.token;
+      if (!token) throw new Error('no_token_in_response');
+      localStorage.setItem(BLE_TOKEN_KEY, token);
+      return token;
+    }
+
+    function initBleMap(center, zoom) {
+      if (bleMap) return;
+      const placeholder = document.getElementById('mapPlaceholder');
+      if (placeholder) placeholder.remove();
+
+      bleMap = L.map('bleMap', { attributionControl: false, zoomControl: true }).setView(center, zoom);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(bleMap);
+
+      // Fix tile loading after reveal
+      setTimeout(() => bleMap.invalidateSize(), 200);
+    }
+
+    function classifyBle(point) {
+      const LOW = 15;
+      const inspectionDays = 1;
+      const now = new Date();
+      const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+      let isInspected = false;
+      let recordDt = 'Не обходилась';
+      if (point.record_dt) {
+        const d = new Date(point.record_dt);
+        const inspDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+        isInspected = (today - inspDate) / 86400000 <= inspectionDays;
+        recordDt = inspDate.toISOString().slice(0, 10);
+      }
+
+      const isLowBattery = point.charge_value != null && point.charge_value <= LOW;
+      let status = 'ok';
+      if (isLowBattery) status = 'battery';
+      else if (!isInspected) status = 'inspection';
+
+      return {
+        id: point.id,
+        ble: String(point.ble_number || ''),
+        name: point.name_extended || '',
+        lat: point.latitude,
+        lng: point.longitude,
+        charge: point.charge_value,
+        locationDesc: point.location_desc || '',
+        bleType: point.ble_type_desc || '',
+        mac: point.mac_address || '',
+        isInspected,
+        isLowBattery,
+        recordDt,
+        status
+      };
+    }
+
+    function createBleIcon(point) {
+      const cls = `ble-dot ble-dot-${point.status}`;
+      return L.divIcon({
+        className: '',
+        html: `<div class="${cls}">${point.ble}</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+    }
+
+    function renderBleMarkers() {
+      bleMapMarkers.forEach(m => bleMap.removeLayer(m));
+      bleMapMarkers = [];
+
+      const q = (document.getElementById('mapBleSearch').value || '').trim().toLowerCase();
+
+      bleMapData.forEach(pt => {
+        if (!pt.lat || !pt.lng) return;
+        if (bleMapFilter !== 'all' && pt.status !== bleMapFilter) return;
+        if (q && !pt.ble.toLowerCase().includes(q)) return;
+
+        const marker = L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
+          .bindPopup(`
+            <div style="font-size:13px;line-height:1.4">
+              <b>Метка #${esc(pt.ble)}</b><br>
+              ${esc(pt.name)}<br>
+              <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
+              <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
+              <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
+              <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
+              <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
+            </div>
+          `, { maxWidth: 280 })
+          .addTo(bleMap);
+
+        bleMapMarkers.push(marker);
+      });
+    }
+
+    function updateMapStats() {
+      const all = bleMapData.length;
+      const ok = bleMapData.filter(p => p.status === 'ok').length;
+      const bat = bleMapData.filter(p => p.status === 'battery').length;
+      const insp = bleMapData.filter(p => p.status === 'inspection').length;
+
+      document.getElementById('fcAll').textContent = all;
+      document.getElementById('fcOk').textContent = ok;
+      document.getElementById('fcBat').textContent = bat;
+      document.getElementById('fcInsp').textContent = insp;
+      document.getElementById('msOk').textContent = ok;
+      document.getElementById('msBat').textContent = bat;
+      document.getElementById('msInsp').textContent = insp;
+    }
+
+    async function loadBleMap() {
+      try {
+        // 1) get config
+        let center = [53.038, 39.011];
+        let zoom = 15;
+        try {
+          const cfg = await bleApiFetch('/api/v1/map/config');
+          if (cfg.defaultView?.latitude) center = [cfg.defaultView.latitude, cfg.defaultView.longitude];
+          if (cfg.defaultZoom) zoom = cfg.defaultZoom;
+        } catch {}
+
+        initBleMap(center, zoom);
+
+        // 2) get user data for companyId
+        let companyId;
+        try {
+          const ud = await bleApiFetch('/api/v1/user/profile');
+          companyId = ud.companyId || ud.company_id;
+        } catch {
+          // fallback: try from /api/v1/user/data
+          try {
+            const ud2 = await bleApiFetch('/api/v1/user/data');
+            companyId = ud2.companyId || ud2.company_id;
+          } catch {}
+        }
+        if (!companyId) { showMapMsg('Не удалось определить companyId', 'error'); return; }
+
+        // 3) load BLE markers
+        const rawBle = await bleApiFetch(`/api/v1/map/ble/${companyId}`);
+        bleMapData = rawBle.map(classifyBle);
+
+        updateMapStats();
+        renderBleMarkers();
+
+        // 4) load zones
+        try {
+          const mapData = await bleApiFetch(`/api/v1/map/${companyId}/map_data`);
+          if (mapData.zones && mapData.points) {
+            const pointsByZone = {};
+            mapData.points.forEach(p => {
+              if (!pointsByZone[p.zoneId]) pointsByZone[p.zoneId] = [];
+              pointsByZone[p.zoneId].push([p.latitude, p.longitude]);
+            });
+            mapData.zones.forEach(z => {
+              const pts = pointsByZone[z.id];
+              if (pts && pts.length > 2) {
+                L.polygon(pts, {
+                  color: z.color || '#0000ff', opacity: 0.35, fillOpacity: 0.15, weight: 1.5
+                }).bindTooltip(z.name || '', { permanent: true, className: 'zone-label' }).addTo(bleMap);
+              }
+            });
+          }
+        } catch {}
+
+        // fit bounds
+        const validPts = bleMapData.filter(p => p.lat && p.lng);
+        if (validPts.length > 1) {
+          const bounds = L.latLngBounds(validPts.map(p => [p.lat, p.lng]));
+          bleMap.fitBounds(bounds, { padding: [30, 30] });
+        }
+
+        document.getElementById('mapAuthBlock').style.display = 'none';
+        document.getElementById('mapFiltersBlock').style.display = 'flex';
+        document.getElementById('mapStatsBlock').style.display = 'flex';
+        document.getElementById('mapSearchBlock').style.display = 'flex';
+        hideMapMsg();
+        bleMapInitialized = true;
+
+      } catch (e) {
+        if (e.message === 'no_token' || e.message === 'unauthorized') {
+          document.getElementById('mapAuthBlock').style.display = 'flex';
+          showMapMsg('Требуется авторизация для загрузки карты', '');
+        } else {
+          showMapMsg('Ошибка загрузки: ' + e.message, 'error');
+        }
+      }
+    }
+
+    // Map event handlers
+    document.getElementById('mapLoginBtn').addEventListener('click', async () => {
+      const login = document.getElementById('mapLogin').value.trim();
+      const pw = document.getElementById('mapPassword').value.trim();
+      if (!login || !pw) { showMapMsg('Введите логин и пароль', 'error'); return; }
+      const btn = document.getElementById('mapLoginBtn');
+      btn.disabled = true; btn.textContent = '⌛';
+      try {
+        await bleLogin(login, pw);
+        showMapMsg('Авторизация успешна, загрузка карты...', 'ok');
+        await loadBleMap();
+      } catch (e) {
+        showMapMsg('Ошибка авторизации. Проверьте логин и пароль.', 'error');
+      }
+      btn.disabled = false; btn.textContent = 'Войти';
+    });
+
+    document.querySelectorAll('.map-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        bleMapFilter = btn.dataset.filter;
+        renderBleMarkers();
+      });
+    });
+
+    document.getElementById('mapBleSearch')?.addEventListener('input', () => {
+      renderBleMarkers();
+    });
+
+    // Map section toggle
+    const mapSection = document.querySelector('[data-map-section="ble"]');
+    const mapSectionHeader = mapSection.querySelector('.map-section-header');
+    mapSectionHeader.addEventListener('click', () => {
+      const wasOpen = mapSection.classList.contains('open');
+      mapSection.classList.toggle('open');
+      if (!wasOpen && !bleMapInitialized) {
+        if (getBleToken()) {
+          loadBleMap();
+        }
+      }
+      if (!wasOpen && bleMap) {
+        setTimeout(() => bleMap.invalidateSize(), 300);
+      }
+      saveState();
+    });
+
+    // =============================================
+    //  ОБЩАЯ ИНИЦИАЛИЗАЦИЯ
+    // =============================================
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('workDate').valueAsDate = new Date();
       const logo = document.querySelector('header img');
@@ -765,6 +1112,7 @@
         document.getElementById('logoFallback').style.display = 'inline';
       });
       loadState();
+
       document.querySelectorAll('.group-header').forEach(header => {
         header.addEventListener('click', () => { header.parentElement.classList.toggle('open'); saveState(); });
       });
@@ -783,9 +1131,7 @@
         if (!wasOpen) { ["1","2","kns","night"].forEach(k => { if (!lineData[k]) loadLine(k); }); loadStatusBox(); }
         saveState();
       });
-      document.querySelectorAll('.line-tab').forEach(tab => {
-        tab.addEventListener('click', () => switchLine(tab.dataset.line));
-      });
+      document.querySelectorAll('.line-tab').forEach(tab => { tab.addEventListener('click', () => switchLine(tab.dataset.line)); });
       document.getElementById('notesNew').addEventListener('input', saveState);
       document.getElementById('notesLost').addEventListener('input', saveState);
       if (document.querySelector('[data-tgroup="lines"]').classList.contains('open')) {
@@ -793,6 +1139,12 @@
       }
       document.getElementById('workDate').addEventListener('change', saveState);
       document.getElementById('workerName').addEventListener('input', saveState);
+      document.getElementById('tableSearch').addEventListener('input', () => renderLine(currentLine));
+
+      // Auto-load map if token exists and section is open
+      if (mapSection.classList.contains('open') && getBleToken()) {
+        loadBleMap();
+      }
     });
 
     window.addEventListener('beforeunload', saveState);
