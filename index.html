@@ -975,12 +975,11 @@
             });
             mapData.zones.forEach(z => {
               const pts = pointsByZone[z.id];
-  if (pts && pts.length > 2) {
-    L.polygon(pts, {
-      color: z.color || '#0000ff', opacity: 0.35, fillOpacity: 0.15, weight: 1.5
-    }).bindTooltip(z.name || '', { permanent: false, className: 'zone-label' }).addTo(bleMap);
-  }
-});
+              if (pts && pts.length > 2) {
+                L.polygon(pts, { color: z.color || '#0000ff', opacity: 0.35, fillOpacity: 0.15, weight: 1.5 })
+                  .bindTooltip(z.name || '', { permanent: false, className: 'zone-label' }).addTo(bleMap);
+              }
+            });
           }
         } catch {}
 
@@ -1010,7 +1009,20 @@
       });
     });
 
-    document.getElementById('mapBleSearch')?.addEventListener('input', () => { renderBleMarkers(); });
+    document.getElementById('mapBleSearch')?.addEventListener('input', () => {
+      renderBleMarkers();
+      const q = document.getElementById('mapBleSearch').value.trim().toLowerCase().replace(/^ble/i, '');
+      if (!q) return;
+      const found = bleMapData.find(p => p.ble.toLowerCase() === q);
+      if (found && found.lat && found.lng) {
+        bleMap.setView([found.lat, found.lng], 19, { animate: true });
+        const marker = bleMapMarkers.find(m => {
+          const ll = m.getLatLng();
+          return ll.lat === found.lat && ll.lng === found.lng;
+        });
+        if (marker) marker.openPopup();
+      }
+    });
 
     const mapSection = document.querySelector('[data-map-section="ble"]');
     const mapSectionHeader = mapSection.querySelector('.map-section-header');
