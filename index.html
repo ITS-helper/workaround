@@ -571,6 +571,9 @@
         <div class="map-inner">
           <div id="mapAuthBlock" class="map-auth-bar" style="display:none"></div>
           <div id="mapMsg" class="map-msg" style="display:none"></div>
+          <div style="text-align:center;margin-bottom:10px;display:none" id="mapRetryBtnWrap">
+            <button class="map-auth-btn" id="mapRetryBtn" onclick="retryBleMap()" style="display:none">↺ Обновить карту</button>
+          </div>
           <div id="mapFiltersBlock" class="map-filters" style="display:none">
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
@@ -982,8 +985,9 @@
       const res = await fetch(BLE_API_BASE + path, {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
-      if (res.status === 401) {
-        if (retried) throw new Error('unauthorized');
+      if (res.status === 401 || res.status === 500) {
+        if (retried) throw new Error(`HTTP ${res.status}`);
+        // Сбрасываем токен и пробуем заново
         localStorage.removeItem(BLE_TOKEN_KEY);
         await bleAutoLogin();
         return bleApiFetch(path, true);
@@ -1156,12 +1160,28 @@
         document.getElementById('mapLayerToggle').style.display = 'flex';
         document.getElementById('mapFiltersBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
+        document.getElementById('mapLayerToggle').style.display = 'flex';
+        document.getElementById('mapRetryBtn').style.display = 'none';
         hideMapMsg();
         bleMapInitialized = true;
 
       } catch (e) {
-        showMapMsg('Ошибка загрузки карты: ' + e.message, 'error');
+        localStorage.removeItem(BLE_TOKEN_KEY);
+        showMapMsg('Ошибка загрузки карты: ' + e.message + '. Нажмите «Обновить» для повторной попытки.', 'error');
+        document.getElementById('mapRetryBtn').style.display = 'inline-flex';
       }
+    }
+
+    async function retryBleMap() {
+      const btn = document.getElementById('mapRetryBtn');
+      btn.disabled = true;
+      btn.textContent = '⌛ Загрузка...';
+      localStorage.removeItem(BLE_TOKEN_KEY);
+      bleMapInitialized = false;
+      hideMapMsg();
+      await loadBleMap();
+      btn.disabled = false;
+      btn.textContent = '↺ Обновить карту';
     }
 
     document.querySelectorAll('.map-filter-btn').forEach(btn => {
