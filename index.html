@@ -544,7 +544,7 @@
           </div>
           <div class="table-search">
             <input type="number" inputmode="numeric" id="tableSearch" placeholder="Поиск по № метки...">
-            <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">↺ Обновить</button>
+            <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">↺ Обновить данные</button>
           </div>
           <div class="data-table-wrap">
             <table class="data-table">
@@ -575,13 +575,9 @@
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
             <button class="map-filter-btn filter-battery" data-filter="battery">🔋 Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
-            <button class="map-filter-btn filter-inspection" data-filter="inspection">🚶 Не пройдена <span class="filter-count" id="fcInsp">0</span></button>
+            <button class="map-filter-btn filter-inspection" data-filter="inspection">🚶 Не обойдена <span class="filter-count" id="fcInsp">0</span></button>
           </div>
-          <div id="mapStatsBlock" class="map-stats" style="display:none">
-            <div class="map-stat"><span class="dot dot-ok"></span> В норме: <span id="msOk">0</span></div>
-            <div class="map-stat"><span class="dot dot-battery"></span> Заряд ≤15%: <span id="msBat">0</span></div>
-            <div class="map-stat"><span class="dot dot-inspection"></span> Не пройдена: <span id="msInsp">0</span></div>
-          </div>
+
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
             <button class="map-search-clear" id="mapSearchClear" title="Очистить">✕</button>
@@ -815,7 +811,12 @@
         const statusIdx = headers.findIndex(h => norm(h) === norm(STATUS_COL_NAME));
         if (statusIdx !== -1) {
           rows.sort((a, b) => {
-            const rank = v => { const s = v.trim(); if (s === STATUS_WAIT) return 0; if (s === STATUS_DONE) return 1; return 2; };
+            const rank = v => {
+              const s = v.trim();
+              if (s === STATUS_WAIT || s === '') return 0;  // не обойдены — первые
+              if (s === STATUS_DONE) return 2;               // выполнено — последние
+              return 1;
+            };
             return rank(a[statusIdx]) - rank(b[statusIdx]);
           });
         }
@@ -849,7 +850,7 @@
       } else {
         document.getElementById("dataTbody").innerHTML = filtered.map(row => {
           const isDone = statusIdx !== -1 && row[statusIdx].trim() === STATUS_DONE;
-          const isWait = statusIdx !== -1 && row[statusIdx].trim() === STATUS_WAIT;
+          const isWait = statusIdx !== -1 && (row[statusIdx].trim() === STATUS_WAIT || row[statusIdx].trim() === '');
           return `<tr class="${isDone ? 'row-done' : (isWait ? 'row-wait' : '')}">${displayCols.map(c => `<td>${esc(row[c.idx] ?? '')}</td>`).join('')}</tr>`;
         }).join('');
       }
@@ -1097,9 +1098,6 @@
       document.getElementById('fcOk').textContent = ok;
       document.getElementById('fcBat').textContent = bat;
       document.getElementById('fcInsp').textContent = insp;
-      document.getElementById('msOk').textContent = ok;
-      document.getElementById('msBat').textContent = bat;
-      document.getElementById('msInsp').textContent = insp;
     }
 
     async function loadBleMap() {
@@ -1157,7 +1155,6 @@
 
         document.getElementById('mapLayerToggle').style.display = 'flex';
         document.getElementById('mapFiltersBlock').style.display = 'flex';
-        document.getElementById('mapStatsBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
         hideMapMsg();
         bleMapInitialized = true;
