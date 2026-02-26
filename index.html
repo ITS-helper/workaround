@@ -37,9 +37,11 @@
     header {
       background: linear-gradient(90deg, #0b2740 0%, #0e3359 60%, #123b63 100%);
       padding: 0;
-      box-shadow: 0 4px 24px rgba(11,39,64,0.45);
+      box-shadow: 0 4px 24px rgba(11,39,64,0.45), 0 2px 0 rgba(0,176,255,0.3);
       position: sticky; top: 0; z-index: 100;
-      border-bottom: 2px solid rgba(0,176,255,0.3);
+      /* border-bottom убран — заменён на box-shadow чтобы не было артефакта на iOS */
+      transform: translateZ(0); /* форсируем GPU-слой, убирает глюк на Safari */
+      -webkit-transform: translateZ(0);
     }
     .header-inner {
       max-width: 960px; margin: 0 auto;
@@ -527,7 +529,7 @@
       <div class="subtasks"><div class="subtasks-inner">
         <div class="subtask">
           <input type="checkbox" data-task-id="morning-2">
-          <span>Выдача часов в окне 6:00–8:00. Проверка полок с часами</span>
+          <span>Выдача часов в окне 6:00–8:00. Уборка полок с часами</span>
         </div>
       </div></div>
     </div>
@@ -604,7 +606,7 @@
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
             <button class="map-filter-btn filter-battery" data-filter="battery">🔋 Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
-            <button class="map-filter-btn filter-inspection" data-filter="inspection">🚶 Не обойдена <span class="filter-count" id="fcInsp">0</span></button>
+            <button class="map-filter-btn filter-inspection" data-filter="inspection">🚶 Не Пройдена <span class="filter-count" id="fcInsp">0</span></button>
           </div>
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
