@@ -412,7 +412,7 @@
       50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
     }
     .map-layer-toggle {
-      display: flex; gap: 6px; margin-bottom: 10px;
+      display: flex; gap: 6px;
     }
     .map-layer-btn {
       font-family: 'Oswald', sans-serif; font-size: 0.78em; letter-spacing: 0.06em;
@@ -667,21 +667,21 @@
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
             <button class="map-filter-btn filter-battery" data-filter="battery">Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
-            <button class="map-filter-btn filter-inspection" data-filter="inspection">Не пройдена <span class="filter-count" id="fcInsp">0</span></button>
+            <button class="map-filter-btn filter-inspection" data-filter="inspection">Не обойдена <span class="filter-count" id="fcInsp">0</span></button>
           </div>
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
             <button class="map-search-clear" id="mapSearchClear" title="Очистить">✕</button>
           </div>
-          <div id="mapFullscreenBtnWrap" style="display:none;margin-bottom:8px;">
-            <button class="map-fullscreen-btn" onclick="openFullscreenMap()">
+          <div id="mapBottomControls" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center;">
+            <button class="map-fullscreen-btn" id="mapFullscreenBtnWrap" onclick="openFullscreenMap()" style="margin-bottom:0;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
               Полный экран
             </button>
-          </div>
-          <div id="mapLayerToggle" class="map-layer-toggle" style="display:none">
-            <button class="map-layer-btn" id="btnSatellite" data-layer="satellite">🛰 Спутник</button>
-            <button class="map-layer-btn active" id="btnStreet" data-layer="street">🗺 Схема</button>
+            <div id="mapLayerToggle" class="map-layer-toggle" style="margin-bottom:0;">
+              <button class="map-layer-btn" id="btnSatellite" data-layer="satellite">🛰 Спутник</button>
+              <button class="map-layer-btn active" id="btnStreet" data-layer="street">🗺 Схема</button>
+            </div>
           </div>
           <div id="bleMap"><div class="map-placeholder" id="mapPlaceholder">Раскройте блок для загрузки карты…</div></div>
         </div>
@@ -1248,8 +1248,7 @@
         document.getElementById('mapLayerToggle').style.display = 'flex';
         document.getElementById('mapFiltersBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
-        document.getElementById('mapLayerToggle').style.display = 'flex';
-        document.getElementById('mapFullscreenBtnWrap').style.display = 'block';
+        document.getElementById('mapBottomControls').style.display = 'flex';
         document.getElementById('mapRetryBtn').style.display = 'none';
         hideMapMsg();
         bleMapInitialized = true;
@@ -1600,7 +1599,7 @@
       <button class="map-filter-btn filter-all active" data-fsfilter="all">Все <span class="filter-count" id="fcFsAll">0</span></button>
       <button class="map-filter-btn filter-ok" data-fsfilter="ok">✓ В норме <span class="filter-count" id="fcFsOk">0</span></button>
       <button class="map-filter-btn filter-battery" data-fsfilter="battery">Низкий заряд <span class="filter-count" id="fcFsBat">0</span></button>
-      <button class="map-filter-btn filter-inspection" data-fsfilter="inspection">Не пройдена <span class="filter-count" id="fcFsInsp">0</span></button>
+      <button class="map-filter-btn filter-inspection" data-fsfilter="inspection">Не обойдена <span class="filter-count" id="fcFsInsp">0</span></button>
     </div>
     <div class="map-fullscreen-search">
       <input type="text" id="mapFsSearch" placeholder="Поиск по № метки: 898 или ble898" inputmode="numeric">
