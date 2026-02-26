@@ -428,6 +428,67 @@
     }
     @supports (padding: max(0px)) { .actions { bottom: max(16px, env(safe-area-inset-bottom)); } }
 
+    /* ===== FULLSCREEN MAP ===== */
+    .map-fullscreen-btn {
+      font-family: 'Oswald', sans-serif; font-size: 0.78em; letter-spacing: 0.06em;
+      text-transform: uppercase; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: #f8fafc; color: var(--muted);
+      cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .map-fullscreen-btn:hover { background: #f0f6ff; border-color: var(--accent); color: var(--primary); }
+    .map-fullscreen-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      background: #1a2a3a; display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .map-fullscreen-overlay.open { opacity: 1; pointer-events: all; }
+    .map-fullscreen-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: linear-gradient(90deg, #0b2740, #123b63);
+      flex-shrink: 0; gap: 8px;
+    }
+    .map-fullscreen-title {
+      font-family: 'Oswald', sans-serif; font-size: 0.9em; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase; color: #fff;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .map-fullscreen-close {
+      font-family: 'Oswald', sans-serif; font-size: 0.8em; letter-spacing: 0.06em;
+      text-transform: uppercase; font-weight: 600; padding: 7px 16px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1);
+      color: #fff; cursor: pointer; transition: all 0.18s ease;
+    }
+    .map-fullscreen-close:hover { background: rgba(255,255,255,0.2); }
+    .map-fullscreen-controls {
+      display: flex; gap: 6px; padding: 8px 14px; flex-wrap: wrap; align-items: center;
+      background: rgba(11,39,64,0.85); flex-shrink: 0;
+    }
+    .map-fullscreen-controls .map-filter-btn { font-size: 0.72em; padding: 5px 11px; }
+    .map-fullscreen-search {
+      display: flex; align-items: center; padding: 6px 14px; flex-shrink: 0;
+      background: rgba(11,39,64,0.7); position: relative;
+    }
+    .map-fullscreen-search input {
+      width: 100%; padding: 9px 34px 9px 14px; border: 1.5px solid rgba(0,176,255,0.5);
+      border-radius: 8px; font-size: 15px; font-family: 'Source Sans 3', sans-serif;
+      background: rgba(255,255,255,0.97); color: #1a2a3a;
+    }
+    .map-fullscreen-search input:focus { outline: none; border-color: var(--accent); }
+    .map-fullscreen-search input::placeholder { color: #a0b0c0; }
+    .map-fullscreen-search-clear {
+      position: absolute; right: 22px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 18px; line-height: 1; padding: 4px; display: none;
+    }
+    .map-fullscreen-layer {
+      display: flex; gap: 6px; padding: 6px 14px 8px;
+      background: rgba(11,39,64,0.7); flex-shrink: 0;
+    }
+    .map-fullscreen-layer .map-layer-btn { font-size: 0.72em; padding: 5px 11px; }
+    #bleMapFS {
+      flex: 1; width: 100%; min-height: 0;
+    }
+
     /* ===== MODAL REPORT ===== */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(11,39,64,0.55);
@@ -604,13 +665,19 @@
           </div>
           <div id="mapFiltersBlock" class="map-filters" style="display:none">
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
-            <button class="map-filter-btn filter-ok" data-filter="ok">В норме <span class="filter-count" id="fcOk">0</span></button>
+            <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
             <button class="map-filter-btn filter-battery" data-filter="battery">Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
-            <button class="map-filter-btn filter-inspection" data-filter="inspection">Не обойдена <span class="filter-count" id="fcInsp">0</span></button>
+            <button class="map-filter-btn filter-inspection" data-filter="inspection">Не пройдена <span class="filter-count" id="fcInsp">0</span></button>
           </div>
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
             <input type="text" id="mapBleSearch" placeholder="Введите номер метки: 898 или ble898" inputmode="numeric">
             <button class="map-search-clear" id="mapSearchClear" title="Очистить">✕</button>
+          </div>
+          <div id="mapFullscreenBtnWrap" style="display:none;margin-bottom:8px;">
+            <button class="map-fullscreen-btn" onclick="openFullscreenMap()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              Полный экран
+            </button>
           </div>
           <div id="mapLayerToggle" class="map-layer-toggle" style="display:none">
             <button class="map-layer-btn" id="btnSatellite" data-layer="satellite">🛰 Спутник</button>
@@ -1182,6 +1249,7 @@
         document.getElementById('mapFiltersBlock').style.display = 'flex';
         document.getElementById('mapSearchBlock').style.display = 'flex';
         document.getElementById('mapLayerToggle').style.display = 'flex';
+        document.getElementById('mapFullscreenBtnWrap').style.display = 'block';
         document.getElementById('mapRetryBtn').style.display = 'none';
         hideMapMsg();
         bleMapInitialized = true;
@@ -1334,6 +1402,146 @@
       if (!container.querySelector('.reminder-banner:not(.hidden)')) container.style.display = 'none';
     }
 
+
+    // =============================================
+    //  FULLSCREEN MAP
+    // =============================================
+    let bleMapFS = null;
+    let bleMapFSMarkers = [];
+    let bleMapFSFilter = 'all';
+    let bleMapFSInitialized = false;
+    let fsTileLayers = null;
+    let fsTileLayerCurrent = 'street';
+
+    function syncFsStats() {
+      const all = bleMapData.length;
+      const ok = bleMapData.filter(p => p.status === 'ok').length;
+      const bat = bleMapData.filter(p => p.status === 'battery').length;
+      const insp = bleMapData.filter(p => p.status === 'inspection').length;
+      const el = id => document.getElementById(id);
+      if (el('fcFsAll')) el('fcFsAll').textContent = all;
+      if (el('fcFsOk')) el('fcFsOk').textContent = ok;
+      if (el('fcFsBat')) el('fcFsBat').textContent = bat;
+      if (el('fcFsInsp')) el('fcFsInsp').textContent = insp;
+    }
+
+    function renderFsMarkers() {
+      if (!bleMapFS) return;
+      bleMapFSMarkers.forEach(m => bleMapFS.removeLayer(m));
+      bleMapFSMarkers = [];
+      const q = (document.getElementById('mapFsSearch').value || '').trim().toLowerCase().replace(/^ble/i,'');
+      bleMapData.forEach(pt => {
+        if (!pt.lat || !pt.lng) return;
+        if (bleMapFSFilter !== 'all' && pt.status !== bleMapFSFilter) return;
+        if (q && !pt.ble.toLowerCase().includes(q)) return;
+        const marker = L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
+          .bindPopup(`
+            <div style="font-size:13px;line-height:1.5">
+              <b>Метка #${esc(pt.ble)}</b><br>
+              ${esc(pt.name)}<br>
+              <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
+              <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
+              <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
+              <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
+              <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
+            </div>`, { maxWidth: 280 })
+          .addTo(bleMapFS);
+        bleMapFSMarkers.push(marker);
+      });
+    }
+
+    function openFullscreenMap() {
+      const overlay = document.getElementById('mapFullscreenOverlay');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      if (!bleMapFSInitialized) {
+        // Init map in the fullscreen container
+        const fsEl = document.getElementById('bleMapFS');
+        bleMapFS = L.map('bleMapFS', { attributionControl: false, zoomControl: true });
+
+        fsTileLayers = {
+          satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' }),
+          street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+        };
+        fsTileLayers.street.addTo(bleMapFS);
+
+        // Copy view from main map or fit bounds
+        if (bleMap) {
+          bleMapFS.setView(bleMap.getCenter(), bleMap.getZoom());
+        } else if (bleMapData.length) {
+          const validPts = bleMapData.filter(p => p.lat && p.lng);
+          if (validPts.length > 1) {
+            bleMapFS.fitBounds(L.latLngBounds(validPts.map(p => [p.lat, p.lng])), { padding: [30, 30] });
+          } else {
+            bleMapFS.setView([53.038, 39.011], 15);
+          }
+        } else {
+          bleMapFS.setView([53.038, 39.011], 15);
+        }
+
+        // Layer toggle
+        document.querySelectorAll('[data-fslayer]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const layer = btn.dataset.fslayer;
+            if (layer === fsTileLayerCurrent) return;
+            bleMapFS.removeLayer(fsTileLayers[fsTileLayerCurrent]);
+            fsTileLayers[layer].addTo(bleMapFS);
+            fsTileLayerCurrent = layer;
+            document.querySelectorAll('[data-fslayer]').forEach(b => b.classList.toggle('active', b.dataset.fslayer === layer));
+          });
+        });
+
+        // Filter buttons
+        document.querySelectorAll('[data-fsfilter]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-fsfilter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            bleMapFSFilter = btn.dataset.fsfilter;
+            renderFsMarkers();
+          });
+        });
+
+        // Search
+        const fsSearchEl = document.getElementById('mapFsSearch');
+        const fsSearchClear = document.getElementById('mapFsSearchClear');
+        fsSearchEl.addEventListener('input', () => {
+          fsSearchClear.style.display = fsSearchEl.value ? 'block' : 'none';
+          renderFsMarkers();
+          const q = fsSearchEl.value.trim().toLowerCase().replace(/^ble/i,'');
+          if (!q) return;
+          const found = bleMapData.find(p => p.ble.toLowerCase() === q);
+          if (found && found.lat && found.lng) {
+            bleMapFS.setView([found.lat, found.lng], 19, { animate: true });
+            const marker = bleMapFSMarkers.find(m => { const ll = m.getLatLng(); return ll.lat === found.lat && ll.lng === found.lng; });
+            if (marker) marker.openPopup();
+          }
+        });
+        fsSearchClear.addEventListener('click', () => {
+          fsSearchEl.value = ''; fsSearchClear.style.display = 'none';
+          renderFsMarkers(); fsSearchEl.focus();
+        });
+
+        bleMapFSInitialized = true;
+      }
+
+      syncFsStats();
+      renderFsMarkers();
+      setTimeout(() => bleMapFS.invalidateSize(), 150);
+    }
+
+    function closeFullscreenMap() {
+      document.getElementById('mapFullscreenOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('mapFullscreenOverlay').classList.contains('open')) {
+        closeFullscreenMap();
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('workDate').valueAsDate = new Date();
       const logo = document.querySelector('header img');
@@ -1378,5 +1586,31 @@
     window.addEventListener('beforeunload', saveState);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) saveState(); });
   </script>
+
+  <!-- FULLSCREEN MAP -->
+  <div class="map-fullscreen-overlay" id="mapFullscreenOverlay">
+    <div class="map-fullscreen-header">
+      <span class="map-fullscreen-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00b0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Карта BLE-меток
+      </span>
+      <button class="map-fullscreen-close" onclick="closeFullscreenMap()">✕ Закрыть</button>
+    </div>
+    <div class="map-fullscreen-controls" id="mapFsFilters">
+      <button class="map-filter-btn filter-all active" data-fsfilter="all">Все <span class="filter-count" id="fcFsAll">0</span></button>
+      <button class="map-filter-btn filter-ok" data-fsfilter="ok">✓ В норме <span class="filter-count" id="fcFsOk">0</span></button>
+      <button class="map-filter-btn filter-battery" data-fsfilter="battery">Низкий заряд <span class="filter-count" id="fcFsBat">0</span></button>
+      <button class="map-filter-btn filter-inspection" data-fsfilter="inspection">Не пройдена <span class="filter-count" id="fcFsInsp">0</span></button>
+    </div>
+    <div class="map-fullscreen-search">
+      <input type="text" id="mapFsSearch" placeholder="Поиск по № метки: 898 или ble898" inputmode="numeric">
+      <button class="map-fullscreen-search-clear" id="mapFsSearchClear" title="Очистить">✕</button>
+    </div>
+    <div class="map-fullscreen-layer">
+      <button class="map-layer-btn" id="btnFsSatellite" data-fslayer="satellite">🛰 Спутник</button>
+      <button class="map-layer-btn active" id="btnFsStreet" data-fslayer="street">🗺 Схема</button>
+    </div>
+    <div id="bleMapFS"></div>
+  </div>
 </body>
 </html>
