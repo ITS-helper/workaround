@@ -1257,8 +1257,8 @@
         <div style="font-family:'Oswald',sans-serif;font-size:1em;font-weight:700;color:#0b2740;margin-bottom:2px;">
           Метка #${esc(pt.ble)}
         </div>
-        <div style="color:#2a3a4a;margin-bottom:4px;">${esc(pt.name)}</div>
-        ${pt.locationDesc ? `<div style="color:#5a6a7e;font-size:12px;">${esc(pt.locationDesc)}</div>` : ''}
+        ${pt.bleType ? `<div style="color:#00897b;font-size:12px;font-weight:600;margin-bottom:3px;">${esc(pt.bleType.replace(/^\d+ - /, ''))}</div>` : ''}
+        ${pt.locationDesc ? `<div style="color:#2a3a4a;font-size:12px;margin-bottom:2px;">${esc(pt.locationDesc)}</div>` : ''}
         ${photoHtml}
       </div>`;
     }
