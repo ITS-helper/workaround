@@ -11,7 +11,52 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  
   <style>
+    /* ===== AUTH OVERLAY ===== */
+#authOverlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: linear-gradient(135deg, #0b2740 0%, #123b63 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: opacity 0.3s ease;
+}
+#authOverlay.hidden { opacity: 0; pointer-events: none; }
+.auth-box {
+  background: #fff; border-radius: 16px; padding: 36px 32px;
+  width: 100%; max-width: 360px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  display: flex; flex-direction: column; gap: 20px; align-items: center;
+}
+.auth-logo {
+  font-family: 'Oswald', sans-serif; font-size: 1.1em; font-weight: 600;
+  color: #0b2740; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.auth-title {
+  font-family: 'Oswald', sans-serif; font-size: 0.82em; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #5a6a7e;
+  margin-top: -10px;
+}
+.auth-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid #dde4ee;
+  border-radius: 9px; font-size: 15px; font-family: 'Source Sans 3', sans-serif;
+  color: #1a2a3a; background: #f8fafc; transition: border-color 0.2s;
+  text-align: center; letter-spacing: 0.08em;
+}
+.auth-input:focus { outline: none; border-color: #00b0ff; background: #fff; }
+.auth-btn {
+  width: 100%; font-family: 'Oswald', sans-serif; font-size: 0.95em;
+  letter-spacing: 0.07em; text-transform: uppercase; font-weight: 600;
+  padding: 12px; border-radius: 999px; border: none;
+  background: #00b0ff; color: #04111f; cursor: pointer;
+  transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(0,176,255,0.3);
+}
+.auth-btn:hover { background: #19b9ff; transform: translateY(-1px); }
+.auth-error {
+  font-size: 13px; color: #ef4444; text-align: center;
+  min-height: 18px; font-family: 'Source Sans 3', sans-serif;
+}
+
     /* Cluster styling */
     .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-clip: padding-box; border-radius: 50%; }
     .marker-cluster-small { background-color: rgba(0,176,255,0.25); }
@@ -623,6 +668,22 @@
   </style>
 </head>
 <body>
+<div id="authOverlay">
+  <div class="auth-box">
+    <span class="auth-logo">ITSSupport</span>
+    <span class="auth-title">Чек-лист смены</span>
+    <input
+      class="auth-input"
+      type="password"
+      id="authInput"
+      placeholder="Введите пароль"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') doAuth()"
+    >
+    <button class="auth-btn" onclick="doAuth()">Войти</button>
+    <span class="auth-error" id="authError"></span>
+  </div>
+</div>
 
   <header>
     <div class="header-inner">
@@ -839,6 +900,40 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script>
+    // ===== AUTH =====
+const AUTH_SESSION_KEY = 'admin';
+// Список паролей (можно добавить несколько для разных команд)
+const AUTH_PASSWORDS = ['VELES_2024', 'impl_dept'];
+
+function doAuth() {
+  const val = document.getElementById('authInput').value;
+  const err = document.getElementById('authError');
+  if (AUTH_PASSWORDS.includes(val)) {
+    sessionStorage.setItem(AUTH_SESSION_KEY, '1');
+    const overlay = document.getElementById('authOverlay');
+    overlay.classList.add('hidden');
+    setTimeout(() => overlay.remove(), 350);
+  } else {
+    err.textContent = 'Неверный пароль';
+    document.getElementById('authInput').value = '';
+    document.getElementById('authInput').focus();
+    setTimeout(() => { err.textContent = ''; }, 2500);
+  }
+}
+
+// Проверка при загрузке
+(function checkAuth() {
+  if (sessionStorage.getItem(AUTH_SESSION_KEY) === '1') {
+    document.getElementById('authOverlay').remove();
+  } else {
+    // Фокус на поле ввода после загрузки шрифтов
+    window.addEventListener('load', () => {
+      document.getElementById('authInput')?.focus();
+    });
+  }
+})();
+// ===== END AUTH =====
+
     const SHEET_ID = "1CU56AZdWC9dCvkf_z6CWMtrgfuWRCG3HYx7hp79vI_c";
     const SHEET_NAME = "Для печати🖨️";
     const STATUS_SHEET_NAME = "Свод_журналов_СПГ+ТСБ";
