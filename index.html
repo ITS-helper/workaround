@@ -9,6 +9,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <style>
+    /* Cluster styling */
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-clip: padding-box; border-radius: 50%; }
+    .marker-cluster-small { background-color: rgba(0,176,255,0.25); }
+    .marker-cluster-small div { background-color: rgba(0,176,255,0.7); }
+    .marker-cluster-medium { background-color: rgba(245,158,11,0.25); }
+    .marker-cluster-medium div { background-color: rgba(245,158,11,0.7); }
+    .marker-cluster-large { background-color: rgba(239,68,68,0.25); }
+    .marker-cluster-large div { background-color: rgba(239,68,68,0.7); }
+    .marker-cluster div {
+      width: 30px; height: 30px; margin-left: 5px; margin-top: 5px;
+      text-align: center; border-radius: 50%;
+      font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+    }
+    .marker-cluster span { line-height: 1; }
+  </style>
   <style>
     :root {
       --primary: #0b2740;
@@ -770,6 +789,7 @@
   <canvas id="confetti"></canvas>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script>
     const SHEET_ID = "1CU56AZdWC9dCvkf_z6CWMtrgfuWRCG3HYx7hp79vI_c";
     const SHEET_NAME = "Для печати🖨️";
@@ -1166,29 +1186,52 @@
       return L.divIcon({ className: '', html: `<div class="${cls}">${point.ble}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] });
     }
 
+    let bleClusterGroup = null;
+
+    function makePopup(pt) {
+      return `<div style="font-size:13px;line-height:1.5">
+        <b>Метка #${esc(pt.ble)}</b><br>
+        ${esc(pt.name)}<br>
+        <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
+        <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
+        <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
+        <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
+        <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
+      </div>`;
+    }
+
+    function makeClusterGroup() {
+      return L.markerClusterGroup({
+        maxClusterRadius: 50,
+        disableClusteringAtZoom: 19,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        iconCreateFunction: function(cluster) {
+          const count = cluster.getChildCount();
+          const size = count < 10 ? 'small' : count < 50 ? 'medium' : 'large';
+          return L.divIcon({
+            html: `<div><span>${count}</span></div>`,
+            className: `marker-cluster marker-cluster-${size}`,
+            iconSize: L.point(40, 40)
+          });
+        }
+      });
+    }
+
     function renderBleMarkers() {
-      bleMapMarkers.forEach(m => bleMap.removeLayer(m));
-      bleMapMarkers = [];
+      if (bleClusterGroup) { bleMap.removeLayer(bleClusterGroup); }
+      bleClusterGroup = makeClusterGroup();
       const q = (document.getElementById('mapBleSearch').value || '').trim().toLowerCase();
       bleMapData.forEach(pt => {
         if (!pt.lat || !pt.lng) return;
         if (bleMapFilter !== 'all' && pt.status !== bleMapFilter) return;
         if (q && !pt.ble.toLowerCase().includes(q)) return;
-        const marker = L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
-          .bindPopup(`
-            <div style="font-size:13px;line-height:1.4">
-              <b>Метка #${esc(pt.ble)}</b><br>
-              ${esc(pt.name)}<br>
-              <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
-              <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
-              <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
-              <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
-              <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
-            </div>
-          `, { maxWidth: 280 })
-          .addTo(bleMap);
-        bleMapMarkers.push(marker);
+        L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
+          .bindPopup(makePopup(pt), { maxWidth: 280 })
+          .addTo(bleClusterGroup);
       });
+      bleMap.addLayer(bleClusterGroup);
+      bleMapMarkers = []; // не используется, но оставим для совместимости
     }
 
     function updateMapStats() {
@@ -1301,13 +1344,12 @@
       const q = raw.trim().toLowerCase().replace(/^ble/i, '');
       if (!q) return;
       const found = bleMapData.find(p => p.ble.toLowerCase() === q);
-      if (found && found.lat && found.lng) {
-        bleMap.setView([found.lat, found.lng], 19, { animate: true });
-        const marker = bleMapMarkers.find(m => {
-          const ll = m.getLatLng();
-          return ll.lat === found.lat && ll.lng === found.lng;
+      if (found && found.lat && found.lng && bleClusterGroup) {
+        bleClusterGroup.eachLayer(m => {
+          if (m.getLatLng().lat === found.lat && m.getLatLng().lng === found.lng) {
+            bleClusterGroup.zoomToShowLayer(m, () => m.openPopup());
+          }
         });
-        if (marker) marker.openPopup();
       }
     });
 
@@ -1434,29 +1476,23 @@
       if (el('fcFsInsp')) el('fcFsInsp').textContent = insp;
     }
 
+    let bleClusterGroupFS = null;
+
     function renderFsMarkers() {
       if (!bleMapFS) return;
-      bleMapFSMarkers.forEach(m => bleMapFS.removeLayer(m));
-      bleMapFSMarkers = [];
+      if (bleClusterGroupFS) { bleMapFS.removeLayer(bleClusterGroupFS); }
+      bleClusterGroupFS = makeClusterGroup();
       const q = (document.getElementById('mapFsSearch').value || '').trim().toLowerCase().replace(/^ble/i,'');
       bleMapData.forEach(pt => {
         if (!pt.lat || !pt.lng) return;
         if (bleMapFSFilter !== 'all' && pt.status !== bleMapFSFilter) return;
         if (q && !pt.ble.toLowerCase().includes(q)) return;
-        const marker = L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
-          .bindPopup(`
-            <div style="font-size:13px;line-height:1.5">
-              <b>Метка #${esc(pt.ble)}</b><br>
-              ${esc(pt.name)}<br>
-              <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
-              <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
-              <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
-              <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
-              <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
-            </div>`, { maxWidth: 280 })
-          .addTo(bleMapFS);
-        bleMapFSMarkers.push(marker);
+        L.marker([pt.lat, pt.lng], { icon: createBleIcon(pt) })
+          .bindPopup(makePopup(pt), { maxWidth: 280 })
+          .addTo(bleClusterGroupFS);
       });
+      bleMapFS.addLayer(bleClusterGroupFS);
+      bleMapFSMarkers = [];
     }
 
     function openFullscreenMap() {
@@ -1520,10 +1556,12 @@
           const q = fsSearchEl.value.trim().toLowerCase().replace(/^ble/i,'');
           if (!q) return;
           const found = bleMapData.find(p => p.ble.toLowerCase() === q);
-          if (found && found.lat && found.lng) {
-            bleMapFS.setView([found.lat, found.lng], 19, { animate: true });
-            const marker = bleMapFSMarkers.find(m => { const ll = m.getLatLng(); return ll.lat === found.lat && ll.lng === found.lng; });
-            if (marker) marker.openPopup();
+          if (found && found.lat && found.lng && bleClusterGroupFS) {
+            bleClusterGroupFS.eachLayer(m => {
+              if (m.getLatLng().lat === found.lat && m.getLatLng().lng === found.lng) {
+                bleClusterGroupFS.zoomToShowLayer(m, () => m.openPopup());
+              }
+            });
           }
         });
         fsSearchClear.addEventListener('click', () => {
