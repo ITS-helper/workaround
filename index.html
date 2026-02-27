@@ -351,13 +351,13 @@
     .map-auth-btn:hover { background: #19b9ff; }
     .map-auth-btn:disabled { opacity: 0.5; cursor: default; }
     .map-filters {
-      display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+      display: flex; gap: 6px; margin-bottom: 12px; align-items: center;
     }
     .map-filter-btn {
       font-family: 'Oswald', sans-serif; font-size: 0.75em; letter-spacing: 0.06em;
       text-transform: uppercase; font-weight: 600; padding: 6px 14px; border-radius: 999px;
       border: 1px solid var(--border); background: #f8fafc; color: var(--muted);
-      cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 5px;
+      cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 5px; flex: 1; justify-content: center; white-space: nowrap;
     }
     .map-filter-btn:hover { background: #f0f6ff; border-color: var(--accent); color: var(--primary); }
     .map-filter-btn.active { color: #fff; border-color: transparent; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
@@ -734,7 +734,6 @@
           <div id="mapFiltersBlock" class="map-filters" style="display:none">
             <button class="map-filter-btn filter-all active" data-filter="all">Все <span class="filter-count" id="fcAll">0</span></button>
             <button class="map-filter-btn filter-ok" data-filter="ok">✓ В норме <span class="filter-count" id="fcOk">0</span></button>
-            <button class="map-filter-btn filter-battery" data-filter="battery">Низкий заряд <span class="filter-count" id="fcBat">0</span></button>
             <button class="map-filter-btn filter-inspection" data-filter="inspection">Не пройдено <span class="filter-count" id="fcInsp">0</span></button>
           </div>
           <div id="mapSearchBlock" class="map-search-bar" style="display:none">
@@ -1741,7 +1740,6 @@
     <div class="map-fullscreen-controls" id="mapFsFilters">
       <button class="map-filter-btn filter-all active" data-fsfilter="all">Все <span class="filter-count" id="fcFsAll">0</span></button>
       <button class="map-filter-btn filter-ok" data-fsfilter="ok">✓ В норме <span class="filter-count" id="fcFsOk">0</span></button>
-      <button class="map-filter-btn filter-battery" data-fsfilter="battery">Низкий заряд <span class="filter-count" id="fcFsBat">0</span></button>
       <button class="map-filter-btn filter-inspection" data-fsfilter="inspection">Не пройдено <span class="filter-count" id="fcFsInsp">0</span></button>
     </div>
     <div class="map-fullscreen-search">
