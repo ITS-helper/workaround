@@ -447,6 +447,17 @@
     }
     @supports (padding: max(0px)) { .actions { bottom: max(16px, env(safe-area-inset-bottom)); } }
 
+    /* ===== POPUP ===== */
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px !important;
+      box-shadow: 0 8px 24px rgba(11,39,64,0.18) !important;
+      padding: 0 !important;
+    }
+    .leaflet-popup-content {
+      margin: 12px 14px !important;
+    }
+    .leaflet-popup-tip-container { margin-top: -1px; }
+
     /* ===== FULLSCREEN MAP ===== */
     .map-fullscreen-btn {
       font-family: 'Oswald', sans-serif; font-size: 0.78em; letter-spacing: 0.06em;
@@ -1177,7 +1188,9 @@
         name: point.name_extended || '', lat: point.latitude, lng: point.longitude,
         charge: point.charge_value, locationDesc: point.location_desc || '',
         bleType: point.ble_type_desc || '', mac: point.mac_address || '',
-        isInspected, isLowBattery, recordDt, status
+        isInspected, isLowBattery, recordDt, status,
+        photoTag: point.photo_url || point.tag_photo || point.ble_photo || '',
+        photoPlace: point.place_photo_url || point.install_photo || point.location_photo || ''
       };
     }
 
@@ -1189,14 +1202,24 @@
     let bleClusterGroup = null;
 
     function makePopup(pt) {
-      return `<div style="font-size:13px;line-height:1.5">
-        <b>Метка #${esc(pt.ble)}</b><br>
-        ${esc(pt.name)}<br>
-        <span style="color:#5a6a7e">Локация:</span> ${esc(pt.locationDesc)}<br>
-        <span style="color:#5a6a7e">Тип зоны:</span> ${esc(pt.bleType)}<br>
-        <span style="color:#5a6a7e">Заряд:</span> <b style="color:${pt.isLowBattery ? '#ef4444' : '#10b981'}">${pt.charge != null ? pt.charge + '%' : '—'}</b><br>
-        <span style="color:#5a6a7e">Обход:</span> ${pt.isInspected ? '✅ ' : '⚠️ '} ${esc(pt.recordDt)}<br>
-        <span style="color:#5a6a7e">MAC:</span> ${esc(pt.mac)}
+      const photos = [pt.photoTag, pt.photoPlace].filter(Boolean);
+      const photoHtml = photos.length
+        ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            ${photos.map((url, i) => `
+              <a href="${esc(url)}" target="_blank" style="display:block;flex:1;min-width:100px;">
+                <img src="${esc(url)}"
+                  style="width:100%;height:90px;object-fit:cover;border-radius:6px;display:block;border:1px solid #dde4ee;"
+                  onerror="this.parentElement.style.display='none'">
+              </a>`).join('')}
+          </div>`
+        : '';
+      return `<div style="font-size:13px;line-height:1.5;min-width:160px;max-width:260px;">
+        <div style="font-family:'Oswald',sans-serif;font-size:1em;font-weight:700;color:#0b2740;margin-bottom:2px;">
+          Метка #${esc(pt.ble)}
+        </div>
+        <div style="color:#2a3a4a;margin-bottom:4px;">${esc(pt.name)}</div>
+        ${pt.locationDesc ? `<div style="color:#5a6a7e;font-size:12px;">${esc(pt.locationDesc)}</div>` : ''}
+        ${photoHtml}
       </div>`;
     }
 
