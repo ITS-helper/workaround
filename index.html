@@ -1202,10 +1202,20 @@
 
     function makeClusterGroup() {
       return L.markerClusterGroup({
-        maxClusterRadius: 50,
+        // Три этапа раскрытия:
+        // zoom < 17  → крупные кластеры (radius 120) — один кружок на район
+        // zoom 17-18 → средние кластеры (radius 40)  — видны отдельные здания
+        // zoom >= 19 → кластеризация отключена, все метки отдельно
+        maxClusterRadius: function(zoom) {
+          if (zoom < 17) return 120;
+          if (zoom < 19) return 40;
+          return 0;
+        },
         disableClusteringAtZoom: 19,
-        spiderfyOnMaxZoom: true,
+        spiderfyOnMaxZoom: false,
         showCoverageOnHover: false,
+        animate: true,
+        animateAddingMarkers: false,
         iconCreateFunction: function(cluster) {
           const count = cluster.getChildCount();
           const size = count < 10 ? 'small' : count < 50 ? 'medium' : 'large';
