@@ -1209,9 +1209,9 @@
         maxClusterRadius: function(zoom) {
           if (zoom < 17) return 120;
           if (zoom < 19) return 40;
-          return 0;
+          return 1; // минимум — при zoom >= 19 кластеризация отключена через disableClusteringAtZoom
         },
-        disableClusteringAtZoom: 19,
+        disableClusteringAtZoom: 22,
         spiderfyOnMaxZoom: false,
         showCoverageOnHover: false,
         animate: true,
